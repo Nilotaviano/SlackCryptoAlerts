@@ -1,0 +1,26 @@
+{
+  "name": "crypto_alerts",
+  "version": "1.0.0",
+  "description": "Slack integration for cryptocurrency alerts",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^3.5.0"
+  },
+  "devDependencies": {
+    "mocha": "^3.3.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "crypto",
+    "cryptocurrency",
+    "slack"
+  ],
+  "author": "Nilo Silva",
+  "license": "ISC"
+}
