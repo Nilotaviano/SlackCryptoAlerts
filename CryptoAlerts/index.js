@@ -42,11 +42,14 @@ app.post("/alerts/new", function (req, res) {
         text: 'I will warn you when ' + currency + ' ' + triggerCondition + ' ' + alertPrice
       };
       
+      console.log('Message sent: ', messageJson);
+      
       res.send(messageJson);
     }
     else {
       var responseJson = JSON.parse(response.body);
       res.send('Error: ' + responseJson.error);
+      console.log('Error: ', responseJson.error);
     }
   });
 });
@@ -59,7 +62,13 @@ app.post("/alerts", function (req, res) {
     responseMessage = responseMessage.concat('Currency: ', allAlerts[i].currency, ', ', 'Price: ', allAlerts[i].price, ', ', 'User: ', allAlerts[i].user, '\n');
   }
   
-  res.send(responseMessage);
+  var messageJson = 
+      {
+        response_type: 'in_channel',
+        text: responseMessage
+      };
+  
+  res.send(messageJson);
 });
 
 var compareFunctions = {
