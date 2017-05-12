@@ -5,16 +5,26 @@ var request = require('request');
 var loki = require('lokijs');
 var IncomingWebhook = require('@slack/client').IncomingWebhook;
 
-
 var url = process.env.SLACK_WEBHOOK_URL || '';
 
 var webhook = new IncomingWebhook(url);
 
 var app = express();
-var db = new loki('loki.json');
 
-var alerts = db.addCollection('alerts')
-
+var db = new loki('loki.db', 
+{
+  autoload: true,
+  autoloadCallback: function() {
+      // if database did not exist it will be empty so I will intitialize here
+      var alerts = db.getCollection('alerts');
+      if (alerts === null) {
+        alerts = db.addCollection('alerts');
+      }
+    },
+  autosave: true, 
+  autosaveInterval: 10000
+}); 
+      
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -34,11 +44,13 @@ app.post("/alerts/new", function (req, res) {
       var currentPrice = responseJson.price_btc;
       var triggerCondition = alertPrice > currentPrice ? '>' : '<';
       
+      var alerts = db.getCollection('alerts');
+      
       alerts.insert( { currency : currency, user: username , price: alertPrice, condition: triggerCondition } );
 
       var messageJson = 
       {
-        response_type: 'in_channel',
+        //response_type: 'in_channel',
         text: 'I will warn you when ' + currency + ' ' + triggerCondition + ' ' + alertPrice
       };
       
@@ -56,6 +68,7 @@ app.post("/alerts/new", function (req, res) {
 
 app.post("/alerts", function (req, res) {
   var responseMessage = 'Alerts:\n'
+  var alerts = db.getCollection('alerts');
   var allAlerts = alerts.find();
   
   for(var i = 0; i < allAlerts.length; i++) {
@@ -80,6 +93,7 @@ function checkTriggeredAlerts() {
   request('https://api.coinmarketcap.com/v1/ticker/', function (error, response, body) {
     if(!error && response.statusCode == 200) {
       var responseJson = JSON.parse(response.body);
+      var alerts = db.getCollection('alerts');
       var allAlerts = alerts.find();
       
       for(var i = 0; i < allAlerts.length; i++) {
