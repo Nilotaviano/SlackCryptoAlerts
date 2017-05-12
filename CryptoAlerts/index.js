@@ -63,8 +63,8 @@ app.post("/alerts", function (req, res) {
 });
 
 var compareFunctions = {
-    '>': function (currentPrice, alertPrice) { return currentPrice > alertPrice },
-    '<': function (currentPrice, alertPrice) { return currentPrice < alertPrice }
+    '>': function (currentPrice, alertPrice) { return currentPrice >= alertPrice },
+    '<': function (currentPrice, alertPrice) { return currentPrice <= alertPrice }
 };
 
 function checkTriggeredAlerts() {
