@@ -6,7 +6,7 @@ var loki = require('lokijs');
 var IncomingWebhook = require('@slack/client').IncomingWebhook;
 
 
-var url = process.env.SLACK_WEBHOOK_URL || ''; //see section above on sensitive data
+var url = process.env.SLACK_WEBHOOK_URL || '';
 
 var webhook = new IncomingWebhook(url);
 
@@ -19,9 +19,6 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-/**bodyParser.json(options)
- * Parses the text as JSON and exposes the resulting object on req.body.
- */
 app.use(bodyParser.json());
 
 app.post("/alerts/new", function (req, res) {
@@ -44,6 +41,7 @@ app.post("/alerts/new", function (req, res) {
         response_type: 'in_channel',
         text: 'I will warn you when ' + currency + ' ' + triggerCondition + ' ' + alertPrice
       };
+      
       res.send(messageJson);
     }
     else {
@@ -79,7 +77,7 @@ function checkTriggeredAlerts() {
         var ticker = responseJson.find(item => { return item.id == allAlerts[i].currency })
         
         if(compareFunctions[allAlerts[i].condition](ticker.price_btc, allAlerts[i].price)) {
-          var messageToSend = '@channel triggered alert: ' + allAlerts[i].currency + ' at price ' + ticker.price_btc;
+          var messageToSend = '<!channel> triggered alert: ' + allAlerts[i].currency + ' at price ' + ticker.price_btc;
           
           try {
             webhook.send(messageToSend, function(err, res) {
