@@ -20,7 +20,7 @@ var db = new loki('loki.db',
       if (alerts === null) {
         alerts = db.addCollection('alerts');
       }
-      alerts.where(function(alert) { return alert.price == null || alert.currency == null || (alert.condition != '<' && alert.condition != '>') }).remove();
+      alerts.chain().where(function(alert) { return alert.price == null || alert.currency == null || (alert.condition != '<' && alert.condition != '>') }).remove();
     },
   autosave: true, 
   autosaveInterval: 10000
