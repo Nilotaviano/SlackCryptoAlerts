@@ -20,6 +20,7 @@ var db = new loki('loki.db',
       if (alerts === null) {
         alerts = db.addCollection('alerts');
       }
+      alerts.where(function(alert) { return alert.price == null || alert.currency == null || (alert.condition != '<' && alert.condition != '>') }).remove();
     },
   autosave: true, 
   autosaveInterval: 10000
@@ -99,7 +100,7 @@ function checkTriggeredAlerts() {
       for(var i = 0; i < allAlerts.length; i++) {
         var ticker = responseJson.find(item => { return item.id == allAlerts[i].currency })
         
-        if(compareFunctions[allAlerts[i].condition](ticker.price_btc, allAlerts[i].price)) {
+        if(ticker != null && compareFunctions[allAlerts[i].condition](ticker.price_btc, allAlerts[i].price)) {
           var messageToSend = '<!channel> triggered alert: ' + allAlerts[i].currency + ' at price ' + ticker.price_btc;
           
           try {
