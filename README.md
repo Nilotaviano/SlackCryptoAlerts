@@ -12,7 +12,7 @@ This bot currently supports these commands:
 * /alerts
   * Lists all configured alerts
 * /delete *coin* *price* (optional)
-  * Removes alerts set by the user. To remove all alerts, use /delete all.
+  * Removes alerts set by the user. To remove all alerts, use /delete all
   
 ## Tips
   
