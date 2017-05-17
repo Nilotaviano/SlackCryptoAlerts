@@ -203,12 +203,14 @@ app.post("/currency", function (req, res) {
   request('https://api.coinmarketcap.com/v1/ticker/' + currency + '/?convert=' + convert, function (error, response, body) {
       if(!error && response.statusCode == 200) {
         var responseJson = JSON.parse(response.body)[0];
-        var currentPrice = responseJson["price_"+convert.toLowerCase()];
+        var currentPrice = parseFloat(responseJson["price_"+convert.toLowerCase()]).toFixed(8);
+        var currencyName = responseJson.name;
+        var currencySymbol = responseJson.symbol;
         
         var messageJson = 
         {
           response_type: 'in_channel',
-          text: currency + ': ' + currentPrice + ' ' + convert
+          text: currencyName + ' (' + currencySymbol + ')' + ': ' + currentPrice + ' ' + convert
         };
         
         console.log('Message sent: ', messageJson);
