@@ -186,6 +186,43 @@ function checkTriggeredAlerts() {
   });
 }
 
+app.post("/currency", function (req, res) {
+  var username = req.body.user_name;
+  var splitText = req.body.text.split(" ");
+  var currency = splitText[0];
+  var convert = 'BTC';
+  
+  if(currency == '')
+    currency = 'Bitcoin';
+    
+  if(splitText.length > 1)
+    convert = splitText[1];
+  else if(currency == 'Bitcoin')
+    convert = 'USD';
+  
+  request('https://api.coinmarketcap.com/v1/ticker/' + currency + '/?convert=' + convert, function (error, response, body) {
+      if(!error && response.statusCode == 200) {
+        var responseJson = JSON.parse(response.body)[0];
+        var currentPrice = responseJson["price_"+convert.toLowerCase()];
+        
+        var messageJson = 
+        {
+          response_type: 'in_channel',
+          text: currency + ': ' + currentPrice + ' ' + convert
+        };
+        
+        console.log('Message sent: ', messageJson);
+        
+        res.send(messageJson);
+      }
+      else {
+        var responseJson = JSON.parse(response.body);
+        res.send('Error: ' + responseJson.error);
+        console.log('Error: ', responseJson.error);
+      }
+    });
+});
+
 // Tell our app to listen on port 8080
 app.listen(8080, function (err) {
   if (err) {
