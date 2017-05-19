@@ -225,8 +225,7 @@ app.post("/currency", function (req, res) {
     });
 });
 
-// Tell our app to listen on port 8080
-app.listen(process.env.PORT, function (err) {
+app.listen(parseInt(process.env.PORT), function (err) {
   if (err) {
     throw err
   }
