@@ -11,7 +11,7 @@ var webhook = new IncomingWebhook(url);
 
 var app = express();
 
-var db = new loki('loki.db', 
+var db = new loki(process.env.DB_NAME, 
 {
   autoload: true,
   autoloadCallback: function() {
