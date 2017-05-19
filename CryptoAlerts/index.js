@@ -21,6 +21,12 @@ var db = new loki(process.env.DB_NAME,
         alerts = db.addCollection('alerts');
       }
       alerts.chain().where(function(alert) { return alert.price == null || alert.currency == null || (alert.condition != '<' && alert.condition != '>') }).remove();
+      
+      var calls = db.getCollection('calls');
+      if (calls === null) {
+        calls = db.addCollection('calls');
+      }
+
     },
   autosave: true, 
   autosaveInterval: 10000
@@ -81,50 +87,89 @@ app.post("/alerts/new", function (req, res) {
   }
 });
 
-app.post("/alerts/delete", function (req, res) {
+app.post("/delete", function (req, res) {
   var username = req.body.user_name;
   var splitText = req.body.text.split(" ");
-  var currency = splitText[0];
-  var alertPrice = splitText[1];
+  var entity = splitText[0];
   
-  var alerts = db.getCollection('alerts');
-
-  var query = alerts.chain().where(function(alert) { return alert.user === username });
-  
-  if(currency != 'all') {
-    query = query.where(function(alert) { return alert.currency === currency });
+  if(entity == 'alert' || entity == 'alerts') {
+    var currency = splitText[1];
+    var alertPrice = splitText[2];
     
-    if(alertPrice != null)
-      query = query.where(function(alert) { return alert.price === alertPrice });
-  }
+    var alerts = db.getCollection('alerts');
   
-  var removedAlerts = query.data();
-  
-  if(removedAlerts.length > 0) {
-    var responseMessage = 'Removed alerts:\n'
+    var query = alerts.chain().where(function(alert) { return alert.user === username });
     
-    for(var i = 0; i < removedAlerts.length ; i++) {
-      responseMessage = responseMessage.concat('Currency: ', removedAlerts[i].currency, ', ', 'Price: ', removedAlerts[i].price, ', ', 'User: ', removedAlerts[i].user, ', ', 'Message: ', removedAlerts[i].message, '\n');
+    if(currency != 'all') {
+      query = query.where(function(alert) { return alert.currency === currency });
+      
+      if(alertPrice != null)
+        query = query.where(function(alert) { return alert.price === alertPrice });
     }
     
-    query.remove();
+    var removedAlerts = query.data();
     
-    var messageJson = 
-    {
-      response_type: 'in_channel',
-      text: responseMessage
-    };
-        
-    console.log('Message sent: ', messageJson);
-    
-    res.send(messageJson);
+    if(removedAlerts.length > 0) {
+      var responseMessage = 'Removed alerts:\n'
+      
+      for(var i = 0; i < removedAlerts.length ; i++) {
+        responseMessage = responseMessage.concat('Currency: ', removedAlerts[i].currency, ', ', 'Price: ', removedAlerts[i].price, ', ', 'User: ', removedAlerts[i].user, ', ', 'Message: ', removedAlerts[i].message, '\n');
+      }
+      
+      query.remove();
+      
+      var messageJson = 
+      {
+        response_type: 'in_channel',
+        text: responseMessage
+      };
+          
+      console.log('Message sent: ', messageJson);
+      
+      res.send(messageJson);
+    }
+    else {
+      var message = 'No alerts found.';
+      
+      console.log('Message sent: ', message);
+      
+      res.send(message);
+    }
   }
-  else {
-    var message = 'No alerts found.';
+  else if(entity == 'call' || entity == 'calls') {
+    var currency = splitText[1];
+    var calls = db.getCollection('calls');
+  
+    var query = calls.chain().where(function(alert) { return alert.currency === currency });
     
-    console.log('Message sent: ', message);
+    var removedCalls = query.data();
     
-    res.send(message);
+    if(removedCalls.length > 0) {
+      var responseMessage = 'Removed calls:\n'
+      
+      for(var i = 0; i < removedCalls.length ; i++) {
+        responseMessage = responseMessage.concat('Currency: ', removedCalls[i].currency, ', ', 'Target: ', removedCalls[i].target, '\n');
+      }
+      
+      query.remove();
+      
+      var messageJson = 
+      {
+        response_type: 'in_channel',
+        text: responseMessage
+      };
+          
+      console.log('Message sent: ', messageJson);
+      
+      res.send(messageJson);
+    }
+    else {
+      var message = 'No calls found.';
+      
+      console.log('Message sent: ', message);
+      
+      res.send(message);
+    }
   }
 });
 
@@ -135,6 +180,88 @@ app.post("/alerts", function (req, res) {
   
   for(var i = 0; i < allAlerts.length; i++) {
     responseMessage = responseMessage.concat('Currency: ', allAlerts[i].currency, ', ', 'Price: ', allAlerts[i].price, ', ', 'User: ', allAlerts[i].user, ', ', 'Message: ', allAlerts[i].message, '\n');
+  }
+  
+  var messageJson = 
+  {
+    response_type: 'in_channel',
+    text: responseMessage
+  };
+  
+  console.log('Message sent: ', messageJson);
+  
+  res.send(messageJson);
+});
+
+app.post("/calls/new", function (req, res) {
+  var username = req.body.user_name;
+  var splitText = req.body.text.split(" ");
+  
+  if(splitText.length >= 2) {
+    var currency = splitText[0];
+    var calls = db.getCollection('calls');
+
+    // Checa se já existe uma call para a moeda
+    var existsCallForCurrency = calls.chain().where(function(call) { return call.currency === currency }).data().length > 0;
+    
+    if(!existsCallForCurrency) {
+      var target = splitText[1];
+      var message = splitText.slice(2, splitText.length).join(" ");
+      
+      request('https://api.coinmarketcap.com/v1/ticker/' + currency, function (error, response, body) {
+        if(!error && response.statusCode == 200) {
+          var responseJson = JSON.parse(response.body)[0];
+          var currentPrice = responseJson.price_btc;
+
+          calls.insert( { currency : currency, user: username , target: target, message: message, original_price: currentPrice } );
+    
+          var messageJson = 
+          {
+            response_type: 'in_channel',
+            text: '<!channel> new call for ' + currency + ' with ' + target + ' target.'
+          };
+          
+          console.log('Message sent: ', messageJson);
+          
+          res.send(messageJson);
+        }
+        else {
+          var responseJson = JSON.parse(response.body);
+          res.send('Error: ' + responseJson.error);
+          console.log('Error: ', responseJson.error);
+        }
+      });
+    }
+    else {
+      var messageJson = 
+      {
+        text: 'There already is a call for ' + currency + '. Remove it before adding another.'
+      };
+      
+      console.log('Message sent: ', messageJson);
+          
+      res.send(messageJson);
+    }
+  }
+  else {
+    var messageJson = 
+    {
+      text: 'Unexpected format. Command format is "/call coin target".'
+    };
+    
+    console.log('Message sent: ', messageJson);
+        
+    res.send(messageJson);
+  }
+});
+
+app.post("/calls", function (req, res) {
+  var responseMessage = ''
+  var calls = db.getCollection('calls');
+  var allCalls = calls.find();
+  
+  for(var i = 0; i < allCalls.length; i++) {
+    responseMessage = responseMessage.concat('Currency: ', allCalls[i].currency, ', ', 'Target: ', allCalls[i].target, ', ', 'User: ', allCalls[i].user, ', ', 'Original price: ', allCalls[i].original_price, '\n');
   }
   
   var messageJson = 
@@ -230,7 +357,7 @@ app.listen(parseInt(process.env.PORT), function (err) {
     throw err
   }
   
-  console.log('Server started on port 8080');
+  console.log('Server started on port ' + process.env.PORT);
   
   setInterval(checkTriggeredAlerts,10000);
 })
