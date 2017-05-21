@@ -86,7 +86,7 @@ app.post("/exchanges/register", function(req, res) {
     var query = exchanges.chain().where(function(registry) { return registry.userid == userid && registry.exchange == exchangeName});
     query.remove();
     
-    exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret });
+    exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret, lastCheck: Date.now() });
     
     var messageJson = "A chave de api foi registrada com sucesso";
     
@@ -136,25 +136,23 @@ function respondOrderHistoryBittrex(res, userid)
 {
   getOrderHistoryBittrex(res, userid, function(orders)
   {
-    var orders = [];
+    var ordersDescriptions = [];
     for(var i = 0; i < orders.length; i++)
     {
       var openOrder = orders[i];
       var currency = openOrder.Exchange.split('-')[1];
       var orderType = openOrder.OrderType == 'LIMIT_SELL' ? 'Venda' : 'Compra';
       var quantity = openOrder.Quantity;
-		  var price = openOrder.Limit;
+		  var price = openOrder.PricePerUnit;
 		 
 		  var orderDescription = currency + '|' + orderType + '|' + quantity + '|' + price;
 		  
-		  orders.push(orderDescription);
+		  ordersDescriptions.unshift(orderDescription);
     }
     
-    orders.sort();
-    
     var responseMessage = 'All your order history is:\n';
-    for(var i in orders)
-		  responseMessage = responseMessage.concat(orders[i] + '\n');
+    for(var i in ordersDescriptions)
+		  responseMessage = responseMessage.concat(ordersDescriptions[i] + '\n');
     
     var messageJson = { 
       text: responseMessage
