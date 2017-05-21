@@ -88,7 +88,7 @@ app.post("/exchanges/register", function(req, res) {
     
     exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret, lastCheck: Date.now() });
     
-    var messageJson = "A chave de api foi registrada com sucesso";
+    var messageJson = "The apikey has been succesfully registered";
     
     res.send(messageJson);
   });
@@ -136,6 +136,8 @@ function respondOrderHistoryBittrex(res, userid)
 {
   getOrderHistoryBittrex(res, userid, function(orders)
   {
+    if(orders == null)
+      return;
     var ordersDescriptions = [];
     for(var i = 0; i < orders.length; i++)
     {
@@ -235,6 +237,8 @@ function checkClosedOrdersBittrex()
     var registry = bittrexRegistries[i];
     getOrderHistoryBittrex(null, registry.userid, function(orders)
     {
+      if(orders == null)
+        return;
        var ordersDescriptions = [];
         for(var i = 0; i < orders.length; i++)
         {
@@ -467,6 +471,23 @@ app.post("/delete", function (req, res) {
       
       res.send(message);
     }
+  }
+  else if(entity == 'register')
+  {
+    var userid = req.body.user_id;
+    
+    var exchanges = db.getCollection('exchanges');
+    var query = exchanges.chain().where(function(registry) { return registry.userid == userid;});
+    query.remove();
+    
+    var messageJson = 
+    {
+      text: "Your exchange integration registry has been removed"
+    }
+    
+    console.log('Message sent: ', messageJson);
+    
+    res.send(messageJson);
   }
   else if(entity == 'call' || entity == 'calls') {
     var currency = splitText[1];
