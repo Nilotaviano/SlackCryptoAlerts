@@ -32,7 +32,7 @@ var db = new loki(process.env.DB_NAME,
       if (exchanges === null) {
         exchanges = db.addCollection('exchanges');
       }
-      exchanges.chain().where(function(registry) { return !registry.hasOwnProperty("userid") || registry.userid === undefined }).remove();
+      exchanges.chain().where(function(registry) { return !registry.hasOwnProperty("userid") || registry.userid === null }).remove();
     },
   autosave: true, 
   autosaveInterval: 10000
@@ -162,7 +162,7 @@ function getOpenOrdersBittrex(res, username, userid)
 {
   var apiRegistry = getAPIKey('bittrex', userid);
   
-  if(apiRegistry === undefined)
+  if(apiRegistry === null)
   {
     var messageJson = { 
       text: "I wasn't able to find your apikey. Please register one to check your orders"
@@ -238,7 +238,7 @@ function checkClosedOrdersBittrex()
   for(var i = 0; i < bittrexRegistries.length; i++)
   {
     var registry = bittrexRegistries[i];
-    getOrderHistoryBittrex(undefined, registry.userid, function(orders)
+    getOrderHistoryBittrex(null, registry.userid, function(orders)
     {
        var ordersDescriptions = [];
         for(var i = 0; i < orders.length; i++)
@@ -303,9 +303,9 @@ function getOrderHistoryBittrex(res, userid, ordersFunction)
 {
   var apiRegistry = getAPIKey('bittrex', userid);
   
-  if(apiRegistry === undefined)
+  if(apiRegistry === null)
   {
-    if(res !== undefined)
+    if(res !== null)
     {
       var messageJson = { 
         text: "I wasn't able to find your apikey. Please register one to check your orders"
@@ -319,7 +319,7 @@ function getOrderHistoryBittrex(res, userid, ordersFunction)
   bittrexAPICall(res, userid, apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function (error, response, body)
   {
     var responseJson = JSON.parse(response.body);
-    if(ordersFunction !== undefined)
+    if(ordersFunction !== null)
       ordersFunction(responseJson.result);
   });
 }
@@ -359,7 +359,7 @@ function getAPIKey(exchangeName, userid)
   var registries = query.data();
   
   if(registries.length == 0)
-    return undefined;
+    return null;
   
   var bittrexRegistry = registries[0];
   return bittrexRegistry;
