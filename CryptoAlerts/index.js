@@ -73,15 +73,8 @@ app.post("/exchanges/register", function(req, res) {
   }
   
   var exchangeName = splitText[0];
-  
-  if (supportedExchanges.indexOf(exchangeName) == -1)
-  {
-    var messageJson = 
-    {
-      text: 'The exchange ' + exchangeName + ' is not supported yet. The exchanges available are ' + supportedExchanges.toString()
-    };
-    res.send(messageJson);
-  }
+    
+  validateExchangeName(res, exchangeName);
   
   var apiKey = splitText[1];
   var apiSecret = splitText[2];
@@ -107,6 +100,8 @@ app.post('/exchanges/getopenorders', function(req, res) {
     var userid = req.body.user_id;
     var exchangeName = req.body.text;
     
+    validateExchangeName(res, exchangeName);
+    
     if(exchangeName == 'bittrex')
       getOpenOrdersBittrex(res, username, userid);
 });
@@ -116,21 +111,26 @@ app.post('/exchanges/getorderhistory', function(req, res) {
     var userid = req.body.user_id;
     var exchangeName = req.body.text;
     
-    if(exchangeName == '')
-    {
-      res.send("Please inform the exchange name. Ex.: "+supportedExchanges[0]);
-      return;
-    }
-    
-    if(supportedExchanges.indexOf(exchangeName) == -1)
-    {
-      res.send("Exchange not supported. The available exchanges are: "+JSON.stringify(supportedExchanges));
-      return;
-    }
+    validateExchangeName(res, exchangeName);
     
     if(exchangeName == 'bittrex')
       respondOrderHistoryBittrex(res, userid);
 });
+
+function validateExchangeName(res, exchangeName)
+{ 
+  if(exchangeName == '')
+  {
+    res.send("Please inform the exchange name. Ex.: "+supportedExchanges[0]);
+    return;
+  }
+  
+  if(supportedExchanges.indexOf(exchangeName) == -1)
+  {
+    res.send("Exchange not supported. The available exchanges are: "+JSON.stringify(supportedExchanges));
+    return;
+  }
+}
 
 function respondOrderHistoryBittrex(res, userid)
 {
