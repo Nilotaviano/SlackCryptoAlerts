@@ -18,21 +18,21 @@ var db = new loki(process.env.DB_NAME,
   autoloadCallback: function() {
       // if database did not exist it will be empty so I will intitialize here
       var alerts = db.getCollection('alerts');
-      if (alerts === null) {
+      if (alerts == null) {
         alerts = db.addCollection('alerts');
       }
       alerts.chain().where(function(alert) { return alert.price == null || alert.currency == null || (alert.condition != '<' && alert.condition != '>') }).remove();
       
       var calls = db.getCollection('calls');
-      if (calls === null) {
+      if (calls == null) {
         calls = db.addCollection('calls');
       }
 
       var exchanges = db.getCollection('exchanges');
-      if (exchanges === null) {
+      if (exchanges == null) {
         exchanges = db.addCollection('exchanges');
       }
-      exchanges.chain().where(function(registry) { return !registry.hasOwnProperty("userid") || registry.userid === null }).remove();
+      exchanges.chain().where(function(registry) { return !registry.hasOwnProperty("userid") || registry.userid == null }).remove();
     },
   autosave: true, 
   autosaveInterval: 10000
@@ -96,7 +96,7 @@ app.post("/exchanges/register", function(req, res) {
     {
       var exchanges = db.getCollection('exchanges');
       
-      var query = exchanges.chain().where(function(registry) { return registry.userid === userid && registry.exchange == exchangeName});
+      var query = exchanges.chain().where(function(registry) { return registry.userid == userid && registry.exchange == exchangeName});
       query.remove();
       
       exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret });
@@ -114,7 +114,7 @@ app.post('/exchanges/getopenorders', function(req, res) {
     var userid = req.body.user_id;
     var exchangeName = req.body.text;
     
-    if(exchangeName === 'bittrex')
+    if(exchangeName == 'bittrex')
       getOpenOrdersBittrex(res, username, userid);
 });
 
@@ -122,7 +122,7 @@ app.post('/exchanges/getorderhistory', function(req, res) {
     var username = req.body.user_name;
     var exchangeName = req.body.text;
     
-    if(exchangeName === 'bittrex')
+    if(exchangeName == 'bittrex')
       respondOrderHistoryBittrex(res, username);
 });
 
@@ -135,7 +135,7 @@ function respondOrderHistoryBittrex(res, username)
     {
       var openOrder = orders[i];
       var currency = openOrder.Exchange.split('-')[1];
-      var orderType = openOrder.OrderType === 'LIMIT_SELL' ? 'Venda' : 'Compra';
+      var orderType = openOrder.OrderType == 'LIMIT_SELL' ? 'Venda' : 'Compra';
       var quantity = openOrder.Quantity;
 		  var price = openOrder.Limit;
 		 
@@ -162,7 +162,7 @@ function getOpenOrdersBittrex(res, username, userid)
 {
   var apiRegistry = getAPIKey('bittrex', userid);
   
-  if(apiRegistry === null)
+  if(apiRegistry == null)
   {
     var messageJson = { 
       text: "I wasn't able to find your apikey. Please register one to check your orders"
@@ -188,7 +188,7 @@ function getOpenOrdersBittrex(res, username, userid)
       {
         var openOrder = responseJson.result[i];
         var currency = openOrder.Exchange.split('-')[1];
-        var orderType = openOrder.OrderType === 'LIMIT_SELL' ? 'Sell' : 'Buy';
+        var orderType = openOrder.OrderType == 'LIMIT_SELL' ? 'Sell' : 'Buy';
         var quantity = openOrder.QuantityRemaining;
 			  var price = openOrder.Limit;
 			  var isConditional = openOrder.IsConditional;
@@ -197,7 +197,7 @@ function getOpenOrdersBittrex(res, username, userid)
 			  
 			  if(openOrder.IsConditional)
 			  {
-  			  var condition = openOrder.Condition === 'GREATER_THAN' ? '>' : '<';
+  			  var condition = openOrder.Condition == 'GREATER_THAN' ? '>' : '<';
   			  var conditionTarget = openOrder.ConditionTarget;
   			  
   			  orderDescription = orderDescription.concat(' when ' + condition + ' ' + conditionTarget);
@@ -251,7 +251,7 @@ function checkClosedOrdersBittrex()
             continue;
           
           var currency = order.Exchange.split('-')[1];
-          var orderType = order.OrderType === 'LIMIT_SELL' ? 'Sold' : 'Bought';
+          var orderType = order.OrderType == 'LIMIT_SELL' ? 'Sold' : 'Bought';
           var quantity = order.Quantity;
   			  var price = order.PricePerUnit;
   			  var isConditional = order.IsConditional;
@@ -285,7 +285,7 @@ function checkClosedOrdersBittrex()
           });
           
           exchanges.updateWhere(
-            function(registry){ return registry.username === registry.username && registry.exchange === 'bittrex' }, 
+            function(registry){ return registry.username == registry.username && registry.exchange == 'bittrex' }, 
             function(registry){ 
               registry.lastCheck = Date.now(); 
               return registry;
@@ -303,9 +303,9 @@ function getOrderHistoryBittrex(res, userid, ordersFunction)
 {
   var apiRegistry = getAPIKey('bittrex', userid);
   
-  if(apiRegistry === null)
+  if(apiRegistry == null)
   {
-    if(res !== null)
+    if(res != null)
     {
       var messageJson = { 
         text: "I wasn't able to find your apikey. Please register one to check your orders"
@@ -319,7 +319,7 @@ function getOrderHistoryBittrex(res, userid, ordersFunction)
   bittrexAPICall(res, userid, apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function (error, response, body)
   {
     var responseJson = JSON.parse(response.body);
-    if(ordersFunction !== null)
+    if(ordersFunction != null)
       ordersFunction(responseJson.result);
   });
 }
@@ -328,7 +328,7 @@ var jsSHA = require("jssha");
 function bittrexAPICall(res, userid, apikey, apisecret, commandRoute, commandParameters, callback)
 {
   var nonce=Date.now;
-  var uri='https://bittrex.com/api/v1.1/'+commandRoute+'?apikey='+apikey+'&nonce='+nonce+(commandParameters !== '' ? '&'+commandParameters : '');
+  var uri='https://bittrex.com/api/v1.1/'+commandRoute+'?apikey='+apikey+'&nonce='+nonce+(commandParameters != '' ? '&'+commandParameters : '');
   var shaObj = new jsSHA("SHA-512", "TEXT");
   shaObj.setHMACKey(apisecret, "TEXT");
   shaObj.update(uri);
@@ -355,7 +355,7 @@ function getAPIKey(exchangeName, userid)
 {
   var exchanges = db.getCollection('exchanges');
 
-  var query = exchanges.chain().where(function(exchange) { return exchange.userid === userid && exchange.exchange === exchangeName });
+  var query = exchanges.chain().where(function(exchange) { return exchange.userid == userid && exchange.exchange == exchangeName });
   var registries = query.data();
   
   if(registries.length == 0)
@@ -425,13 +425,13 @@ app.post("/delete", function (req, res) {
     
     var alerts = db.getCollection('alerts');
   
-    var query = alerts.chain().where(function(alert) { return alert.user === username });
+    var query = alerts.chain().where(function(alert) { return alert.user == username });
     
     if(currency != 'all') {
-      query = query.where(function(alert) { return alert.currency === currency });
+      query = query.where(function(alert) { return alert.currency == currency });
       
       if(alertPrice != null)
-        query = query.where(function(alert) { return alert.price === alertPrice });
+        query = query.where(function(alert) { return alert.price == alertPrice });
     }
     
     var removedAlerts = query.data();
@@ -467,7 +467,7 @@ app.post("/delete", function (req, res) {
     var currency = splitText[1];
     var calls = db.getCollection('calls');
   
-    var query = calls.chain().where(function(alert) { return alert.currency === currency });
+    var query = calls.chain().where(function(alert) { return alert.currency == currency });
     
     var removedCalls = query.data();
     
@@ -529,7 +529,7 @@ app.post("/calls/new", function (req, res) {
     var calls = db.getCollection('calls');
 
     // Checa se já existe uma call para a moeda
-    var existsCallForCurrency = calls.chain().where(function(call) { return call.currency === currency }).data().length > 0;
+    var existsCallForCurrency = calls.chain().where(function(call) { return call.currency == currency }).data().length > 0;
     
     if(!existsCallForCurrency) {
       var target = splitText[1];
