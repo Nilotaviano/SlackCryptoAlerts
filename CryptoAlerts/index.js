@@ -8,6 +8,7 @@ var url = process.env.SLACK_WEBHOOK_URL || '';
 var supportedExchanges = [ "bittrex" ];
 
 var webhook = new IncomingWebhook(url);
+var exchangeWebhook = new IncomingWebhook('https://hooks.slack.com/services/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');
 
 var app = express();
 
@@ -31,6 +32,7 @@ var db = new loki(process.env.DB_NAME,
       if (exchanges === null) {
         exchanges = db.addCollection('exchanges');
       }
+      exchanges.chain().where(function(registry) { return !registry.hasOwnProperty("userid") || registry.userid === undefined }).remove();
     },
   autosave: true, 
   autosaveInterval: 10000
@@ -56,6 +58,7 @@ app.post("/exchanges/list", function(req, res) {
 
 app.post("/exchanges/register", function(req, res) {
   var username = req.body.user_name;
+  var userid = req.body.user_id;
   var splitText = req.body.text.split(" ");
   
   if(splitText.length != 3)
@@ -81,7 +84,7 @@ app.post("/exchanges/register", function(req, res) {
   var apiKey = splitText[1];
   var apiSecret = splitText[2];
   
-  bittrexAPICall(res, username, apiKey, apiSecret, 'market/getopenorders', 'market=BTC-LTC', function (error, response, body)
+  bittrexAPICall(res, userid, apiKey, apiSecret, 'market/getopenorders', 'market=BTC-LTC', function (error, response, body)
   {
     if(error || response.statusCode != 200)
     {
@@ -93,10 +96,10 @@ app.post("/exchanges/register", function(req, res) {
     {
       var exchanges = db.getCollection('exchanges');
       
-      var query = exchanges.chain().where(function(registry) { return registry.username === username && registry.exchange == exchangeName});
+      var query = exchanges.chain().where(function(registry) { return registry.userid === userid && registry.exchange == exchangeName});
       query.remove();
       
-      exchanges.insert({ username: username, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret });
+      exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret });
       
       var messageJson = "A chave de api foi registrada com sucesso";
       
@@ -108,10 +111,11 @@ app.post("/exchanges/register", function(req, res) {
 
 app.post('/exchanges/getopenorders', function(req, res) {
     var username = req.body.user_name;
+    var userid = req.body.user_id;
     var exchangeName = req.body.text;
     
     if(exchangeName === 'bittrex')
-      getOpenOrdersBittrex(res, username);
+      getOpenOrdersBittrex(res, username, userid);
 });
 
 app.post('/exchanges/getorderhistory', function(req, res) {
@@ -119,12 +123,44 @@ app.post('/exchanges/getorderhistory', function(req, res) {
     var exchangeName = req.body.text;
     
     if(exchangeName === 'bittrex')
-      getOrderHistoryBittrex(res, username);
+      respondOrderHistoryBittrex(res, username);
 });
 
-function getOpenOrdersBittrex(res, username)
+function respondOrderHistoryBittrex(res, username)
 {
-  var apiRegistry = getAPIKey('bittrex', username);
+  getOrderHistoryBittrex(res, username, function(orders)
+  {
+    var orders = [];
+    for(var i = 0; i < orders.length; i++)
+    {
+      var openOrder = orders[i];
+      var currency = openOrder.Exchange.split('-')[1];
+      var orderType = openOrder.OrderType === 'LIMIT_SELL' ? 'Venda' : 'Compra';
+      var quantity = openOrder.Quantity;
+		  var price = openOrder.Limit;
+		 
+		  var orderDescription = currency + '|' + orderType + '|' + quantity + '|' + price;
+		  
+		  orders.push(orderDescription);
+    }
+    
+    orders.sort();
+    
+    var responseMessage = 'All your order history is:\n';
+    for(var i in orders)
+		  responseMessage = responseMessage.concat(orders[i] + '\n');
+    
+    var messageJson = { 
+      text: responseMessage
+    }
+    
+    res.send(messageJson);
+  });
+}
+
+function getOpenOrdersBittrex(res, username, userid)
+{
+  var apiRegistry = getAPIKey('bittrex', userid);
   
   if(apiRegistry === undefined)
   {
@@ -136,7 +172,7 @@ function getOpenOrdersBittrex(res, username)
     return;
   }
   
-  bittrexAPICall(res, username, apiRegistry.apikey, apiRegistry.apiSecret, 'market/getopenorders', '', function (error, response, body)
+  bittrexAPICall(res, userid, apiRegistry.apikey, apiRegistry.apiSecret, 'market/getopenorders', '', function (error, response, body)
   {
     if(error || response.statusCode != 200)
     {
@@ -184,53 +220,112 @@ function getOpenOrdersBittrex(res, username)
   });
 }
 
-function getOrderHistoryBittrex(res, username, callback)
+function checkClosedOrders()
 {
-  var apiRegistry = getAPIKey('bittrex', username);
+  checkClosedOrdersBittrex();
+}
+
+function checkClosedOrdersBittrex()
+{
+  var exchanges = db.getCollection("exchanges");
+  
+  var x = exchanges.find();
+  var bittrexRegistries = exchanges.chain().where(function(registry) { return registry.exchange == "bittrex"}).data();
+  
+  if(bittrexRegistries.length == 0)
+    return;
+    
+  for(var i = 0; i < bittrexRegistries.length; i++)
+  {
+    var registry = bittrexRegistries[i];
+    getOrderHistoryBittrex(undefined, registry.userid, function(orders)
+    {
+       var ordersDescriptions = [];
+        for(var i = 0; i < orders.length; i++)
+        {
+          var order = orders[i];
+          
+          var orderDate = Date.parse(order.Closed);
+          
+          if(!registry.hasOwnProperty("lastCheck") || orderDate < registry.lastCheck)
+            continue;
+          
+          var currency = order.Exchange.split('-')[1];
+          var orderType = order.OrderType === 'LIMIT_SELL' ? 'Sold' : 'Bought';
+          var quantity = order.Quantity;
+  			  var price = order.Limit;
+  			  var isConditional = order.IsConditional;
+  			 
+  			  var orderDescription = currency + ': ' + orderType + ' ' + quantity + ' at ' + price;
+  			  ordersDescriptions.push(orderDescription);
+        }
+        
+        if(ordersDescriptions.length == 0)
+          return;
+        
+        ordersDescriptions.sort();
+        
+        var responseMessage = '<@'+registry.userid+ '|' + registry.username +'> Some orders were executed:\n';
+        for(var i in ordersDescriptions)
+  			  responseMessage = responseMessage.concat(ordersDescriptions[i] + '\n');
+        
+        var messageJson = {
+          text: responseMessage,
+          channel: '@'+ registry.userid
+        }
+        
+        try 
+        {
+          exchangeWebhook.send(messageJson, function(err, res) {
+              if (err) {
+                console.log('Error:', err);
+              } else {
+                console.log('Message sent: ', res);
+              }
+          });
+          
+          exchanges.updateWhere(
+            function(registry){ return registry.username === registry.username && registry.exchange === 'bittrex' }, 
+            function(registry){ 
+              registry.lastCheck = Date.now(); 
+              return registry;
+            }
+          );
+        }
+        catch(err) {
+          console.log('Error dispatching alert: ' + err.message);
+        }
+    });
+  }
+}
+
+function getOrderHistoryBittrex(res, userid, ordersFunction)
+{
+  var apiRegistry = getAPIKey('bittrex', userid);
   
   if(apiRegistry === undefined)
   {
-    var messageJson = { 
-      text: "I wasn't able to find your apikey. Please register one to check your orders"
-    };
-    
-    res.send(messageJson);
+    if(res !== undefined)
+    {
+      var messageJson = { 
+        text: "I wasn't able to find your apikey. Please register one to check your orders"
+      };
+      
+      res.send(messageJson);
+    }
     return;
   }
   
-  bittrexAPICall(res, username, apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function (error, response, body)
+  bittrexAPICall(res, userid, apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function (error, response, body)
   {
     var responseJson = JSON.parse(response.body);
-    var orders = [];
-    for(var i = 0; i < responseJson.result.length; i++)
-    {
-      var openOrder = responseJson.result[i];
-      var currency = openOrder.Exchange.split('-')[1];
-      var orderType = openOrder.OrderType === 'LIMIT_SELL' ? 'Venda' : 'Compra';
-      var quantity = openOrder.Quantity;
-		  var price = openOrder.Limit;
-		 
-		  var orderDescription = currency + '|' + orderType + '|' + quantity + '|' + price;
-		  
-		  orders.push(orderDescription);
-    }
-    
-    orders.sort();
-    
-    var responseMessage = 'All your order history is:\n';
-    for(var i in orders)
-		  responseMessage = responseMessage.concat(orders[i] + '\n');
-    
-    var messageJson = { 
-      text: responseMessage
-    }
-    
-    res.send(messageJson);
+    if(ordersFunction !== undefined)
+      ordersFunction(responseJson.result);
   });
 }
 
 var jsSHA = require("jssha");
-function bittrexAPICall(res, username, apikey, apisecret, commandRoute, commandParameters, callback)
+function bittrexAPICall(res, userid, apikey, apisecret, commandRoute, commandParameters, callback)
 {
   var nonce=Date.now;
   var uri='https://bittrex.com/api/v1.1/'+commandRoute+'?apikey='+apikey+'&nonce='+nonce+(commandParameters !== '' ? '&'+commandParameters : '');
@@ -256,11 +351,11 @@ function bittrexAPICall(res, username, apikey, apisecret, commandRoute, commandP
   });
 }
 
-function getAPIKey(exchangeName, username)
+function getAPIKey(exchangeName, userid)
 {
   var exchanges = db.getCollection('exchanges');
 
-  var query = exchanges.chain().where(function(exchange) { return exchange.username === username && exchange.exchange === exchangeName });
+  var query = exchanges.chain().where(function(exchange) { return exchange.userid === userid && exchange.exchange === exchangeName });
   var registries = query.data();
   
   if(registries.length == 0)
@@ -592,4 +687,5 @@ app.listen(parseInt(process.env.PORT), function (err) {
   console.log('Server started on port ' + process.env.PORT);
   
   setInterval(checkTriggeredAlerts,10000);
+  setInterval(checkClosedOrders,10000);
 })
