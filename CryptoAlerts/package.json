@@ -10,8 +10,9 @@
   "dependencies": {
     "body-parser": "^1.17.1",
     "chai": "^3.5.0",
-    "lokijs": "^1.4.3",
     "express": "^4.15.2",
+    "jssha": "^2.3.0",
+    "lokijs": "^1.4.3",
     "request": "^2.81.0"
   },
   "devDependencies": {
