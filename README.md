@@ -34,7 +34,12 @@ This bot currently supports these commands:
   * Lists your whole order history
 
   
-  
+## Setup
+To use this bot, the following environment variables are needed:
+* PORT: The port in which the server will run
+* DB_NAME: The name which will be used to persist the database
+* ALERTS_WEBHOOK_URL: Webhook which will be used to send messages for triggered alerts
+* EXCHANGES_WEBHOOK_URL: Webhook which will be used to send messages for executed orders
 ## Tips
   
 #### BTC:
