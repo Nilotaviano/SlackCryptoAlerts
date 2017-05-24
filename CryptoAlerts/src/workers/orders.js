@@ -2,6 +2,7 @@ var request = require('request');
 var db = require('./../database/db');
 var helper = require('./../helpers/exchanges');
 var IncomingWebhook = require('@slack/client').IncomingWebhook;
+var bittrex = require('node.bittrex.api');
 var poloniex = require('poloniex-api-node');
 
 var exchangesWebhookURL = process.env.EXCHANGES_WEBHOOK_URL || '';
