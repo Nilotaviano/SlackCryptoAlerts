@@ -175,7 +175,7 @@ router.post("/price", function (req, res) {
   calls.push(function(callback) {
     bittrex.getticker( { market : "BTC-"+currency }, function(ticker) {
       if(ticker.success) {
-        var price = { exchange: 'Bittrex', bid: ticker.result.Bid, ask: ticker.result.Ask, last: ticker.result.Last };
+        var price = { exchange: 'Bittrex', bid: ticker.result.Bid.toFixed(8), ask: ticker.result.Ask.toFixed(8), last: ticker.result.Last.toFixed(8) };
         callback(null, price);
       }
       else {
@@ -209,9 +209,9 @@ router.post("/price", function (req, res) {
       {
         if(result[i] != null) {
           message = message.concat(result[i].exchange + ": " + currency + "\n");
-          message = message.concat("Bid: " + result[i].bid.toFixed(8) + " BTC\n");
-          message = message.concat("Ask: " + result[i].ask.toFixed(8) + " BTC\n");
-          message = message.concat("Last: " + result[i].last.toFixed(8) + " BTC\n");
+          message = message.concat("Bid: " + result[i].bid + " BTC\n");
+          message = message.concat("Ask: " + result[i].ask + " BTC\n");
+          message = message.concat("Last: " + result[i].last + " BTC\n");
           message = message.concat("\n");
         }
       }
