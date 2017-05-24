@@ -43,7 +43,7 @@ router.post("/register", function(req, res) {
   var apiSecret = splitText[2];
   
   if(exchangeName == "bittrex") {
-    helper.bittrexAPICall(res, userid, apiKey, apiSecret, 'market/getopenorders', 'market=BTC-LTC', function (error, response, body)
+    helper.bittrexAPICall(apiKey, apiSecret, 'market/getopenorders', 'market=BTC-LTC', function (error, response, body)
     {
       if(!error) {
         var exchanges = db.getCollection('exchanges');
