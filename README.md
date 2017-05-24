@@ -2,7 +2,7 @@
 
 This is a slack bot for setting up alerts for cryptocurrency prices.
 
-It gets it's prices from coinmarketcap (https://api.coinmarketcap.com/v1/ticker/).
+It gets it's prices from coinmarketcap (https://api.coinmarketcap.com/v1/ticker/). I'm currently planning to make it get from bittrex and poloniex first.
 
 ## Commands
 This bot currently supports these commands:
@@ -26,8 +26,8 @@ This bot currently supports these commands:
 * /register *exchange* *apiKey* *apiSecret*
   * Configures an exchange integration
   * You'll be able to use /getopenorders, /getorderhistory and you'll be notified after any of your orders are executed
-  * Currently, only bittrex is supported, but I plan to add support for poloniex soon
-  * The only needed permission is "Read"
+  * Currently, only bittrex and poloniex are supported
+  * **Do not allow any other permission besides "READ INFO", I will not be responsible if something happens to your portifolio**
 * /getopenorders *exchange*
   * Lists your open orders
 * /getorderhistory *exchange*
