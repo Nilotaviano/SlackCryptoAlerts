@@ -11,8 +11,29 @@ This bot currently supports these commands:
   * Example: /alert monero 0.018
 * /alerts
   * Lists all configured alerts
-* /delete *coin* *price* (optional)
-  * Removes alerts set by the user. To remove all alerts, use /delete all
+* /target *coin* *target*
+  * Sets a target for a call
+  * Example: /target ripple x3
+* /calls
+  * Lists all calls
+* /delete
+  * Removes alerts, calls or exchange registration. To remove all alerts
+  * Example 1: /delete alert ripple - deletes all of your ripple alerts
+  * Example 2: /delete alert ripple 0.000018 - deletes your alert for when ripple reaches 0.000018
+  * Example 3: /delete alerts all - deletes all of your alerts
+  * Example 4: /delete call ripple - deletes a call on ripple
+  * Example 5: /delete register bittrex - deletes your bittrex registration
+* /register *exchange* *apiKey* *apiSecret*
+  * Configures an exchange integration
+  * You'll be able to use /getopenorders, /getorderhistory and you'll be notified after any of your orders are executed
+  * Currently, only bittrex is supported, but I plan to add support for poloniex soon
+  * The only needed permission is "Read"
+* /getopenorders *exchange*
+  * Lists your open orders
+* /getorderhistory *exchange*
+  * Lists your whole order history
+
+  
   
 ## Tips
   
