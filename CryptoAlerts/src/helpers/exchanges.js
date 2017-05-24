@@ -16,7 +16,7 @@ function getOpenOrdersBittrex(res, username, userid)
     return;
   }
   
-  bittrexAPICall(res, userid, apiRegistry.apikey, apiRegistry.apiSecret, 'market/getopenorders', '', function (error, response, body)
+  bittrexAPICall(apiRegistry.apikey, apiRegistry.apiSecret, 'market/getopenorders', '', function (error, response, body)
   {
     var responseJson = JSON.parse(response.body);
     var orders = [];
@@ -72,7 +72,7 @@ function getOrderHistoryBittrex(res, userid, ordersFunction)
     return;
   }
   
-  bittrexAPICall(res, userid, apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function (error, response, body)
+  bittrexAPICall(apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function (error, response, body)
   {
     var responseJson = JSON.parse(response.body);
     if(ordersFunction != null)
@@ -80,7 +80,7 @@ function getOrderHistoryBittrex(res, userid, ordersFunction)
   });
 }
 
-function bittrexAPICall(res, userid, apikey, apisecret, commandRoute, commandParameters, callback)
+function bittrexAPICall(apikey, apisecret, commandRoute, commandParameters, callback)
 {
   var nonce=Date.now;
   var uri='https://bittrex.com/api/v1.1/'+commandRoute+'?apikey='+apikey+'&nonce='+nonce+(commandParameters != '' ? '&'+commandParameters : '');
@@ -102,15 +102,7 @@ function bittrexAPICall(res, userid, apikey, apisecret, commandRoute, commandPar
   
   request(uri, options, function (error, response, body)
   {
-    if(error || response.statusCode != 200)
-    {
-      var responseJson = JSON.parse(response.body);
-      if(res !== null)
-        res.send('Error: ' + responseJson.error);
-      console.log('Error: ', responseJson.error);
-    }
-    else
-      callback(error, response, body);
+    callback(error, response, body);
   });
 }
 
@@ -133,5 +125,6 @@ function getAPIKey(exchangeName, userid)
 module.exports = {
   getOpenOrdersBittrex: getOpenOrdersBittrex,
   getOrderHistoryBittrex: getOrderHistoryBittrex,
-  bittrexAPICall: bittrexAPICall
+  bittrexAPICall: bittrexAPICall,
+  getAPIKey: getAPIKey
 };

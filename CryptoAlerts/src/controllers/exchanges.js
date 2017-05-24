@@ -3,8 +3,9 @@ var router = express.Router();
 var request = require('request');
 var db = require('./../database/db');
 var helper = require('./../helpers/exchanges');
+var poloniex = require('poloniex-api-node');
 
-var supportedExchanges = [ "bittrex" ];
+var supportedExchanges = [ "bittrex", "poloniex" ];
 
 router.post("/list", function(req, res) {
   var messageJson = 
@@ -23,12 +24,14 @@ router.post("/register", function(req, res) {
   var userid = req.body.user_id;
   var splitText = req.body.text.split(" ");
   
-  if(splitText.length != 3)
-  {
+  if(splitText.length != 3) {
     var messageJson = 
     {
       text: 'You should say the exchange you want to register, your api key and the api secret'
     };
+    
+    console.log('Message sent: ', messageJson);
+
     res.send(messageJson);
   }
   
@@ -39,22 +42,62 @@ router.post("/register", function(req, res) {
   var apiKey = splitText[1];
   var apiSecret = splitText[2];
   
-  helper.bittrexAPICall(res, userid, apiKey, apiSecret, 'market/getopenorders', 'market=BTC-LTC', function (error, response, body)
-  {
-    var exchanges = db.getCollection('exchanges');
+  if(exchangeName == "bittrex") {
+    helper.bittrexAPICall(res, userid, apiKey, apiSecret, 'market/getopenorders', 'market=BTC-LTC', function (error, response, body)
+    {
+      if(!error) {
+        var exchanges = db.getCollection('exchanges');
+      
+        var query = exchanges.chain().where(function(registry) { return registry.userid == userid && registry.exchange == exchangeName});
+        query.remove();
+      
+        var registryDate = new Date();
+        registryDate.setMinutes(registryDate.getMinutes()-65);
+        exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret, lastCheck: registryDate.getTime() });
+      
+        var message = "The apikey has been succesfully registered";
+      
+        console.log('Message sent: ', message);
+      
+        res.send(message);
+      }
+      else {
+        var message = "Couldn't connect to the exchange, is your api correct?";
+      
+        console.log('Message sent: ', message);
+      
+        res.send(message);
+      }
+    });
+  }
+  else if(exchangeName == "poloniex") {
+    var polo = new poloniex(apiKey, apiSecret);
     
-    var query = exchanges.chain().where(function(registry) { return registry.userid == userid && registry.exchange == exchangeName});
-    query.remove();
-    
-    var registryDate = new Date();
-    registryDate.setMinutes(registryDate.getMinutes()-65);
-    exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret, lastCheck: registryDate.getTime() });
-    
-    var messageJson = "The apikey has been succesfully registered";
-    
-    res.send(messageJson);
-  });
-  
+    polo.returnOpenOrders("BTC_LTC", function (err, openOrders) {
+      if (err) {
+          var message = "Error while testing API keys. Error: " + err.message;
+      
+          console.log('Message sent: ', message);
+      
+          res.send(message);
+      } else {
+        var exchanges = db.getCollection('exchanges');
+      
+        var query = exchanges.chain().where(function(registry) { return registry.userid == userid && registry.exchange == exchangeName});
+        query.remove();
+      
+        var registryDate = new Date();
+        registryDate.setMinutes(registryDate.getMinutes()-65);
+        exchanges.insert({ username: username, userid: userid, exchange: exchangeName, apikey: apiKey, apiSecret: apiSecret, lastCheck: registryDate.getTime() });
+      
+        var message = "The apikey has been succesfully registered";
+      
+        console.log('Message sent: ', message);
+      
+        res.send(message);
+      }
+    });
+  }
 });
 
 router.post('/getopenorders', function(req, res) {
@@ -64,8 +107,37 @@ router.post('/getopenorders', function(req, res) {
     
     validateExchangeName(res, exchangeName);
     
-    if(exchangeName == 'bittrex')
+    if(exchangeName == 'bittrex') {
       helper.getOpenOrdersBittrex(res, username, userid);
+    }
+    else if(exchangeName == "poloniex") {
+      var apiRegistry = helper.getAPIKey(exchangeName, userid);
+      
+      var polo = new poloniex(apiRegistry.apikey, apiRegistry.apiSecret);
+      
+      polo.returnOpenOrders("all", function (err, openOrders) {
+        if (err) {
+          var message = "Error: " + err.message;
+      
+          console.log('Message sent: ', message);
+      
+          res.send(message);
+        } else {
+          var actualOpenOrders = new Object();
+          
+          for (var key in openOrders) {
+            if (openOrders.hasOwnProperty(key) && openOrders[key].length > 0) {
+              actualOpenOrders[key] = openOrders[key];
+            }
+          }
+          var message = "Open orders:\n" + JSON.stringify(actualOpenOrders, null, 4);
+          
+          console.log('Message sent: ', message);
+      
+          res.send(message);
+        }
+      });
+    }
 });
 
 router.post('/getorderhistory', function(req, res) {
@@ -77,19 +149,50 @@ router.post('/getorderhistory', function(req, res) {
     
     if(exchangeName == 'bittrex')
       respondOrderHistoryBittrex(res, userid);
+    else if(exchangeName == "poloniex") {
+      var apiRegistry = helper.getAPIKey(exchangeName, userid);
+      
+      var polo = new poloniex(apiRegistry.apikey, apiRegistry.apiSecret);
+      
+      var start = new Date();
+      start.setMonth(start.getMonth() - 1);
+      var end = new Date();
+
+      // Dividing by 1000 converts the date to unix timestamp
+      polo.returnMyTradeHistory("all", start/1000, end/1000, function (err, history) {
+        if (err) {
+          var message = "Error: " + err.message;
+      
+          console.log('Message sent: ', message);
+      
+          res.send(message);
+        } else {
+          var message = "Order history:\n" + JSON.stringify(history, null, 4);
+          
+          console.log('Message sent: ', message);
+      
+          res.send(message);
+        }
+      });
+    }
+
 });
 
 function validateExchangeName(res, exchangeName)
 { 
   if(exchangeName == '')
   {
-    res.send("Please inform the exchange name. Ex.: "+supportedExchanges[0]);
+    var message = "Please inform the exchange name. Ex.: "+supportedExchanges[0];
+    console.log('Message sent: ', message);
+    res.send(message);
     return;
   }
   
   if(supportedExchanges.indexOf(exchangeName) == -1)
   {
-    res.send("Exchange not supported. The available exchanges are: "+JSON.stringify(supportedExchanges));
+    var message = "Exchange not supported. The available exchanges are: "+JSON.stringify(supportedExchanges);
+    console.log('Message sent: ', message);
+    res.send(message);
     return;
   }
 }
@@ -121,6 +224,8 @@ function respondOrderHistoryBittrex(res, userid)
     var messageJson = { 
       text: responseMessage
     }
+    
+    console.log('Message sent: ', messageJson);
     
     res.send(messageJson);
   });
