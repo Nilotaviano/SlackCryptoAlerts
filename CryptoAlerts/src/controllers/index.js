@@ -168,7 +168,7 @@ router.post("/currency", function (req, res) {
 router.post("/price", function (req, res) {
   var username = req.body.user_name;
   var splitText = req.body.text.split(" ");
-  var currency = splitText[0];
+  var currency = splitText[0].toUpperCase();
   var prices = [];
   var calls = []
   
@@ -209,9 +209,9 @@ router.post("/price", function (req, res) {
       {
         if(result[i] != null) {
           message = message.concat(result[i].exchange + ": " + currency + "\n");
-          message = message.concat("Bid: " + result[i].bid + " BTC\n");
-          message = message.concat("Ask: " + result[i].ask + " BTC\n");
-          message = message.concat("Last: " + result[i].last + " BTC\n");
+          message = message.concat("Bid: " + result[i].bid.toFixed(8) + " BTC\n");
+          message = message.concat("Ask: " + result[i].ask.toFixed(8) + " BTC\n");
+          message = message.concat("Last: " + result[i].last.toFixed(8) + " BTC\n");
           message = message.concat("\n");
         }
       }
