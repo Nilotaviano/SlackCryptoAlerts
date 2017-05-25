@@ -48,7 +48,7 @@ function checkClosedOrdersBittrex() {
         var orderDescription = currency + ': ' + orderType + ' ' + quantity + ' at ' + price;
         ordersDescriptions.push(orderDescription);
         
-        setAlertsForExecutedOrders(registry.userid, registry.username, currency, price, orderType) {
+        setAlertsForExecutedOrders(registry.userid, registry.username, currency, price, orderType);
       }
 
       if (ordersDescriptions.length == 0)
