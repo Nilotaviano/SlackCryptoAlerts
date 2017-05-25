@@ -167,8 +167,8 @@ function setAlertsForExecutedOrders(userId, username, currencyAcronym, price, or
 
   var currency = results[0].name;
 
-  alertsHelper.setAlert(username, currency, price * 1.1, '<@' + userId + '|' + username + '> ' + currency + 'went up 10% since you ' + orderType.toLowerCase() + ' it.', null);
-  alertsHelper.setAlert(username, currency, price * 0.9, '<@' + userId + '|' + username + '> ' + currency + 'went down 10% since you ' + orderType.toLowerCase( + ' it.', null);
+  alertsHelper.setAlert(username, currency, price * 1.1, '<@' + userId + '|' + username + '> ' + currency + ' went up 10% since you ' + orderType.toLowerCase() + ' it.', null);
+  alertsHelper.setAlert(username, currency, price * 0.9, '<@' + userId + '|' + username + '> ' + currency + ' went down 10% since you ' + orderType.toLowerCase() + ' it.', null);
 }
 
 module.exports = checkClosedOrders;
