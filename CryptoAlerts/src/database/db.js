@@ -22,6 +22,12 @@ var db = new loki(process.env.DB_NAME,
         exchanges = db.addCollection('exchanges');
       }
       exchanges.chain().where(function(registry) { return !registry.hasOwnProperty("userid") || registry.userid == null }).remove();
+      
+      var acronyms = db.getCollection('acronyms');
+      if (acronyms == null) {
+        acronyms = db.addCollection('acronyms');
+      }
+
     },
   autosave: true, 
   autosaveInterval: 10000
