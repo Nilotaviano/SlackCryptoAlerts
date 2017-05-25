@@ -47,8 +47,8 @@ function checkClosedOrdersBittrex() {
 
         var orderDescription = currency + ': ' + orderType + ' ' + quantity + ' at ' + price;
         ordersDescriptions.push(orderDescription);
-        
-        setAlertsForExecutedOrders(registry.userid, registry.username, currency, price, orderType);
+
+        setAlertsForExecutedOrder(registry.userid, registry.username, currency, price, orderType);
       }
 
       if (ordersDescriptions.length == 0)
@@ -135,8 +135,12 @@ function checkClosedOrdersPoloniex() {
 
           for (var i in historyArray) {
             var orderType = historyArray[i].type == 'sell' ? 'Sold' : 'Bought';
-            var orderDescription = historyArray[i].currencyPair + ': ' + historyArray[i].type + ' ' + historyArray[i].amount + ' at ' + historyArray[i].rate;
+            var currency = historyArray[i].currencyPair.split('_')[0];
+            var orderDescription = currency + ': ' + historyArray[i].type + ' ' + historyArray[i].amount + ' at ' + historyArray[i].rate;
+
             responseMessage = responseMessage.concat(orderDescription + '\n');
+
+            setAlertsForExecutedOrder(registry.userid, registry.username, currency, historyArray[i].rate, orderType);
           }
 
           var messageJson = {
@@ -158,18 +162,33 @@ function checkClosedOrdersPoloniex() {
   });
 }
 
-function setAlertsForExecutedOrders(userId, username, currencyAcronym, price, orderType) {
+function setAlertsForExecutedOrder(userId, username, currencyAcronym, price, orderType) {
   var acronyms = db.getCollection('acronyms');
 
   var results = acronyms.find({
     'acronym': currencyAcronym.toUpperCase()
   });
 
-  if(results[0] != null) {
+  if (results[0] != null) {
     var currency = results[0].name;
+    var alerts = db.getCollection('alerts');
 
-    alertsHelper.setAlert(username, currency, price * 1.1, '<@' + userId + '|' + username + '> ' + currency + ' went up 10% since you ' + orderType.toLowerCase() + ' it.', null);
-    alertsHelper.setAlert(username, currency, price * 0.9, '<@' + userId + '|' + username + '> ' + currency + ' went down 10% since you ' + orderType.toLowerCase() + ' it.', null);
+    // Remove old automated alerts
+    alerts.chain().where(alert => alert.source === 'order' && alert.user === username && alert.currency.toLowerCase() === currency.toLowerCase()).remove();
+
+    //10%
+    var message = '<@' + userId + '|' + username + '> ' + currency + ' went up 10% since you ' + orderType.toLowerCase() + ' it.';
+    alertsHelper.setAlert(username, currency, (price * 1.1).toFixed(8), message, 'order', null);
+
+    message = '<@' + userId + '|' + username + '> ' + currency + ' went down 10% since you ' + orderType.toLowerCase() + ' it.';
+    alertsHelper.setAlert(username, currency, (price * 0.9).toFixed(8), message, 'order', null);
+
+    //double/half
+    message = '<@' + userId + '|' + username + '> ' + currency + ' just doubled since you ' + orderType.toLowerCase() + ' it.';
+    alertsHelper.setAlert(username, currency, (price * 2).toFixed(8), message, 'order', null);
+
+    message = '<@' + userId + '|' + username + '> ' + currency + ' just halved since you ' + orderType.toLowerCase() + ' it.';
+    alertsHelper.setAlert(username, currency, (price * 0.5).toFixed(8), message, 'order', null);
   }
 }
 

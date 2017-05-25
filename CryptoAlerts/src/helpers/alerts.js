@@ -1,7 +1,7 @@
 var request = require('request');
 var db = require('./../database/db');
 
-function setAlert(username, currency, alertPrice, message, callback) {
+function setAlert(username, currency, alertPrice, message, source, callback) {
     // Test if the coin exists on coinmarketcap
     request('https://api.coinmarketcap.com/v1/ticker/' + currency, function(error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -16,7 +16,8 @@ function setAlert(username, currency, alertPrice, message, callback) {
                 user: username,
                 price: alertPrice,
                 condition: triggerCondition,
-                message: message
+                message: message,
+                source: source
             });
 
             if (callback != null)

@@ -12,7 +12,8 @@ router.post("/new", function(req, res) {
     var currency = splitText[0];
     var alertPrice = splitText[1];
     var message = splitText.slice(2, splitText.length).join(" ");
-    helper.setAlert(username, currency, alertPrice, message, function(error, triggerCondition) {
+    
+    helper.setAlert(username, currency, alertPrice, message, 'user', function(error, triggerCondition) {
       if (!error) {
         var messageJson = {
           //response_type: 'in_channel',
