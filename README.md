@@ -25,13 +25,22 @@ This bot currently supports these commands:
   * Example 5: /delete register bittrex - deletes your bittrex registration
 * /register *exchange* *apiKey* *apiSecret*
   * Configures an exchange integration
-  * You'll be able to use /getopenorders, /getorderhistory and you'll be notified after any of your orders are executed
+  * You'll be able to use /getopenorders, /getorderhistory
+  * You'll be notified after any of your orders are executed
+    * +10%, -10%, +100% and -50% alerts are automatically set for every executed order.
   * Currently, only bittrex and poloniex are supported
   * **Do not allow any other permission besides "READ INFO", I will not be responsible if something happens to your portifolio**
 * /getopenorders *exchange*
   * Lists your open orders
 * /getorderhistory *exchange*
   * Lists your whole order history
+* /price *currencyAcronym*
+  * Returns the current price from exchanges
+  * Currently, only bittrex and poloniex are supported
+  * Example: /price XRP
+* /currency *currency* *convert* (optional)
+  * Returns the current price from coinmarketcap, optionally converting it to a target currency
+  * Example: /currency ripple USD
 
   
 ## Setup
