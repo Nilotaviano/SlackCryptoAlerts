@@ -1,8 +1,25 @@
 # SlackCryptoAlerts
 
-This is a slack bot for setting up alerts for cryptocurrency prices.
+This is a slack bot for setting up alerts for cryptocurrency prices, notifying people about executed orders and checking prices.
 
-It gets it's prices from coinmarketcap (https://api.coinmarketcap.com/v1/ticker/). I'm currently planning to make it get from bittrex and poloniex first.
+## Setup
+#### Environment variables
+* PORT: The port in which the server will run
+* DB_NAME: The name which will be used to persist the database
+* ALERTS_WEBHOOK_URL: Webhook which will be used to send messages for triggered alerts
+* EXCHANGES_WEBHOOK_URL: Webhook which will be used to send messages for executed orders
+
+#### Slash commands
+* Create one for every command [below](.#Commands)
+
+#### Webhooks
+* You need at least one webhook, however, I use one for alerts (ALERTS_WEBHOOK_URL) and another for executed orders (EXCHANGES_WEBHOOK_URL)
+
+#### Installation
+* Clone or download this repository
+* Inside the CryptoAlerts directory, run `<npm install>` to install dependencies
+* Start the server using `<node src/app.js>`
+* I highly recommend you to use something like [pm2](https://github.com/Unitech/pm2) to set your environment variables and auto-restart the server in case of a crash (which will happen a lot, given that this is the first time I use node.js)
 
 ## Commands
 This bot currently supports these commands:
@@ -42,13 +59,6 @@ This bot currently supports these commands:
   * Returns the current price from coinmarketcap, optionally converting it to a target currency
   * Example: /currency ripple USD
 
-  
-## Setup
-To use this bot, the following environment variables are needed:
-* PORT: The port in which the server will run
-* DB_NAME: The name which will be used to persist the database
-* ALERTS_WEBHOOK_URL: Webhook which will be used to send messages for triggered alerts
-* EXCHANGES_WEBHOOK_URL: Webhook which will be used to send messages for executed orders
 ## Tips
   
 #### BTC:
