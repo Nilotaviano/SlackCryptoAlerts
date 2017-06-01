@@ -38,7 +38,7 @@ This bot currently supports these commands:
   * Lists all calls
   * Route: /calls
 * /delete
-  * Removes alerts, calls or exchange registration. To remove all alerts
+  * Removes alerts, calls or exchange registrations.
   * Example 1: /delete alert ripple - deletes all of your ripple alerts
   * Example 2: /delete alert ripple 0.000018 - deletes your alert for when ripple reaches 0.000018
   * Example 3: /delete alerts all - deletes all of your alerts
