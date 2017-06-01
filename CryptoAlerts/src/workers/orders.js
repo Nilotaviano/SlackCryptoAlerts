@@ -184,7 +184,7 @@ function setAlertsForExecutedOrder(userId, username, currencyAcronym, price, ord
     alertsHelper.setAlert(username, currency, (price * 0.9).toFixed(8), message, 'order', null);
     
      //20%
-    var message = '<@' + userId + '|' + username + '> ' + currency + ' went up 20% since you ' + orderType.toLowerCase() + ' it.';
+    message = '<@' + userId + '|' + username + '> ' + currency + ' went up 20% since you ' + orderType.toLowerCase() + ' it.';
     alertsHelper.setAlert(username, currency, (price * 1.2).toFixed(8), message, 'order', null);
 
     message = '<@' + userId + '|' + username + '> ' + currency + ' went down 20% since you ' + orderType.toLowerCase() + ' it.';
