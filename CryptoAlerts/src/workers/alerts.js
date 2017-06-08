@@ -1,6 +1,7 @@
 var request = require('request');
 var db = require('./../database/db');
 var IncomingWebhook = require('@slack/client').IncomingWebhook;
+var bot = require('./../bot/bot');
 
 var alertsWebhookUrl = process.env.ALERTS_WEBHOOK_URL || '';
 
@@ -25,6 +26,8 @@ function checkTriggeredAlerts() {
           var messageToSend = '<!channel> triggered alert: ' + allAlerts[i].currency + ' at price ' + ticker.price_btc + '. Message: ' +  allAlerts[i].message;
           
           try {
+            bot.sendMessageToUser(allAlerts[i].user, messageToSend);
+            
             alertsWebhook.send(messageToSend, function(err, res) {
                 if (err) {
                   console.log('Error:', err);
