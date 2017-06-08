@@ -5,6 +5,7 @@ var IncomingWebhook = require('@slack/client').IncomingWebhook;
 var bittrex = require('node.bittrex.api');
 var poloniex = require('poloniex-api-node');
 var alertsHelper = require('./../helpers/alerts');
+var bot = require('./../bot/bot');
 
 var exchangesWebhookURL = process.env.EXCHANGES_WEBHOOK_URL || '';
 
@@ -61,11 +62,12 @@ function checkClosedOrdersBittrex() {
         responseMessage = responseMessage.concat(ordersDescriptions[i] + '\n');
 
       var messageJson = {
-        text: responseMessage,
-        channel: '@' + registry.userid
+        text: responseMessage
       }
 
       try {
+        bot.sendMessageToUser(registry.username, responseMessage);
+        
         exchangeWebhook.send(messageJson, function(err, res) {
           if (err) {
             console.log('Error:', err);
@@ -74,14 +76,14 @@ function checkClosedOrdersBittrex() {
             console.log('Message sent: ', res);
           }
         });
-
+        
         exchanges.updateWhere(
-          function(registry) {
-            return registry.username == registry.username && registry.exchange == 'bittrex'
+          function(r) {
+            return r.username == registry.username && r.exchange == 'bittrex'
           },
-          function(registry) {
-            registry.lastCheck = Date.now();
-            return registry;
+          function(r) {
+            r.lastCheck = Date.now();
+            return r;
           }
         );
       }
@@ -144,9 +146,10 @@ function checkClosedOrdersPoloniex() {
           }
 
           var messageJson = {
-            text: responseMessage,
-            channel: '@' + registry.userid
+            text: responseMessage
           }
+          
+          bot.sendMessageToUser(registry.username, responseMessage);
 
           exchangeWebhook.send(messageJson, function(err, res) {
             if (err) {
