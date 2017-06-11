@@ -203,6 +203,10 @@ function setAlertsForExecutedOrder(userId, username, currencyAcronym, price, ord
 
     message = '<@' + userId + '|' + username + '> ' + currency + ' just halved since you ' + orderType.toLowerCase() + ' it.';
     alertsHelper.setAlert(username, currency, (price * 0.5).toFixed(8), message, 'order', null);
+    
+    //1000%
+    message = '<@' + userId + '|' + username + '> ' + currency + ' went up 1000% since you ' + orderType.toLowerCase() + ' it.';
+    alertsHelper.setAlert(username, currency, (price * 10).toFixed(8), message, 'order', null);
   }
 }
 
