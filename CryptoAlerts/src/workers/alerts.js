@@ -23,7 +23,7 @@ function checkTriggeredAlerts() {
         var ticker = responseJson.find(item => { return item.id == allAlerts[i].currency })
         
         if(ticker != null && compareFunctions[allAlerts[i].condition](ticker.price_btc, allAlerts[i].price)) {
-          var messageToSend = '<!channel> triggered alert: ' + allAlerts[i].currency + ' at price ' + ticker.price_btc + '. Message: ' +  allAlerts[i].message;
+          var messageToSend = 'Triggered alert: ' + allAlerts[i].currency + ' at price ' + ticker.price_btc + '. Message: ' +  allAlerts[i].message;
           
           try {
             bot.sendMessageToUser(allAlerts[i].user, messageToSend);
