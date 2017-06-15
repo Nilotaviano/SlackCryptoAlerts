@@ -9,11 +9,12 @@ router.post("/new", function(req, res) {
   var splitText = req.body.text.split(" ");
 
   if (splitText.length >= 2) {
-    var currency = splitText[0];
+    var currency = splitText[0].toLowerCase();
     var alertPrice = splitText[1];
     var message = splitText.slice(2, splitText.length).join(" ");
     
-    helper.setAlert(username, currency, alertPrice, message, 'user', function(error, triggerCondition) {
+    // TODO: Allow both currency name or acronym
+    helper.setAlert(username, currency, null, alertPrice, message, 'user', null, function(error, triggerCondition) {
       if (!error) {
         var messageJson = {
           //response_type: 'in_channel',
