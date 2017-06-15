@@ -181,32 +181,32 @@ function setAlertsForExecutedOrder(userId, username, currencyAcronym, price, ord
 
     //10%
     var message = '<@' + userId + '|' + username + '> ' + currency + ' went up 10% since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 1.1).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 1.1).toFixed(8), message, 'order', exchange, null);
 
     message = '<@' + userId + '|' + username + '> ' + currency + ' went down 10% since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 0.9).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 0.9).toFixed(8), message, 'order', exchange, null);
     
      //20%
     message = '<@' + userId + '|' + username + '> ' + currency + ' went up 20% since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 1.2).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 1.2).toFixed(8), message, 'order', exchange, null);
 
     message = '<@' + userId + '|' + username + '> ' + currency + ' went down 20% since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 0.8).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 0.8).toFixed(8), message, 'order', exchange, null);
     
     //50%
     message = '<@' + userId + '|' + username + '> ' + currency + ' went up 50% since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 1.5).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 1.5).toFixed(8), message, 'order', exchange, null);
 
     //double/half
     message = '<@' + userId + '|' + username + '> ' + currency + ' just doubled since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 2).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 2).toFixed(8), message, 'order', exchange, null);
 
     message = '<@' + userId + '|' + username + '> ' + currency + ' just halved since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 0.5).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 0.5).toFixed(8), message, 'order', exchange, null);
     
     //1000%
     message = '<@' + userId + '|' + username + '> ' + currency + ' went up 1000% since you ' + orderType.toLowerCase() + ' it.';
-    alertsHelper.setAlert(username, currency, currencyAcronym, (price * 10).toFixed(8), message, 'order', exchange, null);
+    alertsHelper.setAlert(username, currency, currencyAcronym, price, (price * 10).toFixed(8), message, 'order', exchange, null);
   }
 }
 

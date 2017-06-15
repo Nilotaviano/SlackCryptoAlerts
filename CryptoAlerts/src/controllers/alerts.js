@@ -14,7 +14,7 @@ router.post("/new", function(req, res) {
     var message = splitText.slice(2, splitText.length).join(" ");
     
     // TODO: Allow both currency name or acronym
-    helper.setAlert(username, currency, null, alertPrice, message, 'user', null, function(error, triggerCondition) {
+    helper.setAlert(username, currency, null, null, alertPrice, message, 'user', null, function(error, triggerCondition) {
       if (!error) {
         var messageJson = {
           //response_type: 'in_channel',
