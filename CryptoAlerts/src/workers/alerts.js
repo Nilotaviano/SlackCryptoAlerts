@@ -111,7 +111,7 @@ function checkTriggeredAlerts() {
           }
 
           if (market != null && compareFunctions[allAlerts[i].condition](market.price, allAlerts[i].price)) {
-            var messageToSend = 'Triggered alert on ' + market.source + ': ' + allAlerts[i].currency + ' at price ' + market.price + '(was ' + allAlerts[i].price + ').';
+            var messageToSend = 'Triggered alert on ' + market.source + ': ' + allAlerts[i].currency + ' at price ' + market.price + ' (alert was set for ' + allAlerts[i].price + ').';
 
             if (allAlerts[i].message != null)
               messageToSend += ' Message: ' + allAlerts[i].message;
