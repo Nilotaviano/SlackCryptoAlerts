@@ -7,9 +7,9 @@ var poloniex = require('poloniex-api-node');
 var alertsHelper = require('./../helpers/alerts');
 var bot = require('./../bot/bot');
 
-var exchangesWebhookURL = process.env.EXCHANGES_WEBHOOK_URL || '';
+var notificationsWebhookURL = process.env.NOTIFICATIONS_WEBHOOK_URL || '';
 
-var exchangeWebhook = new IncomingWebhook(exchangesWebhookURL);
+var exchangeWebhook = new IncomingWebhook(notificationsWebhookURL);
 
 function checkClosedOrders() {
   checkClosedOrdersBittrex();
