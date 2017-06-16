@@ -42,7 +42,7 @@ function checkClosedOrdersBittrex() {
 
         var currency = order.Exchange.split('-')[1];
         var orderType = order.OrderType == 'LIMIT_SELL' ? 'Sold' : 'Bought';
-        var quantity = order.Quantity;
+        var quantity = order.Quantity - order.QuantityRemaining;
         var price = order.PricePerUnit;
         var isConditional = order.IsConditional;
 
