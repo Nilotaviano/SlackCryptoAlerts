@@ -6,9 +6,9 @@ var async = require('async');
 var bittrex = require('node.bittrex.api');
 var poloniex = require('poloniex-api-node');
 
-var alertsWebhookUrl = process.env.ALERTS_WEBHOOK_URL || '';
+var notificationsWebhookURL = process.env.NOTIFICATIONS_WEBHOOK_URL || '';
 
-var alertsWebhook = new IncomingWebhook(alertsWebhookUrl);
+var alertsWebhook = new IncomingWebhook(notificationsWebhookURL);
 
 var compareFunctions = {
   '>': function(currentPrice, alertPrice) {
