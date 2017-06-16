@@ -83,8 +83,8 @@ function checkTriggeredAlerts() {
           return r != null;
         })) {
 
-        var bittrexMarkets = result.find(r => r.source == 'bittrex').markets
-        var coinmarketcapMarkets = result.find(r => r.source == 'coinmarketcap').markets
+        var bittrexMarkets = result.find(r => r != null && r.source == 'bittrex').markets
+        var coinmarketcapMarkets = result.find(r => r != null && r.source == 'coinmarketcap').markets
 
         var alerts = db.getCollection('alerts');
         var allAlerts = alerts.find();
