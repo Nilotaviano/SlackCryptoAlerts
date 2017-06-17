@@ -29,14 +29,13 @@ function checkTriggeredAlerts() {
         var markets = [];
 
         for (var i in response.result) {
-          if (response.result[i].MarketName.startsWith('BTC-')) {
-            var market = {
-              acronym: response.result[i].MarketName.substring(4),
-              price: response.result[i].Last,
-              source: 'bittrex'
-            };
-            markets.push(market);
-          }
+          var market = {
+            acronym: response.result[i].MarketName.substring(4),
+            price: response.result[i].Last,
+            source: 'bittrex',
+            baseCurrency: response.result[i].MarketName.split('-')[0]
+          };
+          markets.push(market);
         }
 
         callback(null, {
@@ -61,7 +60,8 @@ function checkTriggeredAlerts() {
             currency: responseJson[i].id,
             acronym: responseJson[i].symbol,
             price: responseJson[i].price_btc,
-            source: 'coinmarketcap'
+            source: 'coinmarketcap',
+            baseCurrency: 'BTC'
           };
           markets.push(market);
         }
@@ -98,20 +98,20 @@ function checkTriggeredAlerts() {
             var acronym = acronyms.find({
               'name': allAlerts[i].currency.toLowerCase()
             })[0];
-            
-            if(acronym != null)
+
+            if (acronym != null)
               allAlerts[i].acronym = acronym.acronym;
           }
 
           if (bittrexMarkets.some(m => m.acronym == allAlerts[i].acronym)) {
-            market = bittrexMarkets.find(m => m.acronym == allAlerts[i].acronym);
+            market = bittrexMarkets.find(m => m.acronym == allAlerts[i].acronym && m.baseCurrency == allAlerts[i].baseCurrency);
           }
           else {
-            market = coinmarketcapMarkets.find(m => m.currency == allAlerts[i].currency);
+            market = coinmarketcapMarkets.find(m => m.currency == allAlerts[i].currency == m.baseCurrency == allAlerts[i].baseCurrency);
           }
 
           if (market != null && compareFunctions[allAlerts[i].condition](market.price, allAlerts[i].price)) {
-            var messageToSend = 'Triggered alert on ' + market.source + ': ' + allAlerts[i].currency + ' at price ' + market.price + ' (alert was set for ' + allAlerts[i].price + ').';
+            var messageToSend = `Triggered alert on ${market.source}: ${allAlerts[i].currency} at price ${market.price} ${market.baseCurrency} (alert was set for ${allAlerts[i].price}').`;
 
             if (allAlerts[i].message != null)
               messageToSend += ' Message: ' + allAlerts[i].message;

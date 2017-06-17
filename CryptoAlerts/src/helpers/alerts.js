@@ -1,7 +1,7 @@
 var request = require('request');
 var db = require('./../database/db');
 
-function setAlert(username, currency, currencyAcronym, currentPrice, alertPrice, message, source, exchange, callback) {
+function setAlert(username, currency, currencyAcronym, currentPrice, alertPrice, message, source, exchange, baseCurrency, callback) {
     // Test if the coin exists on coinmarketcap
     request('https://api.coinmarketcap.com/v1/ticker/' + currency, function(error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -13,6 +13,9 @@ function setAlert(username, currency, currencyAcronym, currentPrice, alertPrice,
 
             if (currencyAcronym == null)
                 currencyAcronym = responseJson.symbol;
+                
+            if(baseCurrency == null)
+                baseCurrency = 'BTC';
 
             var alerts = db.getCollection('alerts');
 
@@ -24,7 +27,8 @@ function setAlert(username, currency, currencyAcronym, currentPrice, alertPrice,
                 condition: triggerCondition,
                 message: message,
                 source: source,
-                exchange: exchange
+                exchange: exchange,
+                baseCurrency: baseCurrency
             });
 
             if (callback != null)
