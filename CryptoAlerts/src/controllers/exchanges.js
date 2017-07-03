@@ -217,9 +217,13 @@ function respondOrderHistoryBittrex(res, userid) {
     if (orders == null)
       return;
     var ordersDescriptions = [];
+    
+    var acronyms = db.getCollection('acronyms');
+    
     for (var i = 0; i < orders.length; i++) {
       var openOrder = orders[i];
-      var currency = openOrder.Exchange.split('-')[1];
+      var acronym = openOrder.Exchange.split('-')[1];
+      var currency = acronyms.find({'acronym': acronym.toUpperCase()})[0];
       var orderType = openOrder.OrderType == 'LIMIT_SELL' ? 'Venda' : 'Compra';
       var quantity = openOrder.Quantity;
       var price = openOrder.PricePerUnit;
