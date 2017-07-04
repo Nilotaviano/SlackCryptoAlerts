@@ -6,14 +6,13 @@ This is a slack bot for setting up alerts for cryptocurrency prices, notifying p
 #### Environment variables
 * PORT: The port in which the server will run
 * DB_NAME: The name which will be used to persist the database
-* ALERTS_WEBHOOK_URL: Webhook which will be used to send messages for triggered alerts
-* EXCHANGES_WEBHOOK_URL: Webhook which will be used to send messages for executed orders
+* NOTIFICATIONS_WEBHOOK_URL: Webhook which will be used to send messages for triggered alerts and executed orders
 
 #### Slash commands
 * Create one for every command [below](#commands)
 
 #### Webhooks
-* You need at least one webhook, however, I use one for alerts (ALERTS_WEBHOOK_URL) and another for executed orders (EXCHANGES_WEBHOOK_URL)
+* You need to setup a webhook for notifications
 
 #### Installation
 * Clone or download this repository
