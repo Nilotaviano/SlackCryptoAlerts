@@ -54,7 +54,7 @@ function parseCommandParams(commandText) {
   result.currencyAcronym = splitText[0].toUpperCase();
   result.alertPrice = splitText[2];
   result.baseCurrency = splitText[3];
-  result.exchange = splitText[4];
+  result.exchange = splitText[5];
 
   if (result.currencyAcronym == null || result.alertPrice == null || isNaN(result.alertPrice) || result.baseCurrency == null) {
     result.valid = false;
