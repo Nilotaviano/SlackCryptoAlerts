@@ -22,9 +22,9 @@ This is a slack bot for setting up alerts for cryptocurrency prices, notifying p
 
 ## Commands
 This bot currently supports these commands:
-* /alert *coin* *price*
+* /alert *coin* at *price* *baseCurrency* on *exchange* *"message"*
   * Sets an alert for when the coin reaches a certain price
-  * Example: /alert monero 0.018
+  * Example: /alert 1ST at 0.5 ETH on bittrex "damn"
   * Route: /alerts/new
 * /alerts
   * Lists all configured alerts

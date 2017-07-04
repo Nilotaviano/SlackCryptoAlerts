@@ -5,12 +5,10 @@ var db = require('./../database/db');
 var helper = require('./../helpers/exchanges');
 var poloniex = require('poloniex-api-node');
 
-var supportedExchanges = ["bittrex", "poloniex"];
-
 router.post("/list", function(req, res) {
   var messageJson = {
     //response_type: 'in_channel',
-    text: 'The exchanges available for consult are ' + supportedExchanges.toString()
+    text: 'The exchanges available for consult are ' + helper.supportedExchanges.toString()
   };
 
   console.log('Message sent: ', messageJson);
@@ -198,14 +196,14 @@ router.post('/getorderhistory', function(req, res) {
 
 function validateExchangeName(res, exchangeName) {
   if (exchangeName == '') {
-    var message = "Please inform the exchange name. Ex.: " + supportedExchanges[0];
+    var message = "Please inform the exchange name. Ex.: " + helper.supportedExchanges[0];
     console.log('Message sent: ', message);
     res.send(message);
     return;
   }
 
-  if (supportedExchanges.indexOf(exchangeName) == -1) {
-    var message = "Exchange not supported. The available exchanges are: " + JSON.stringify(supportedExchanges);
+  if (helper.supportedExchanges.indexOf(exchangeName) == -1) {
+    var message = "Exchange not supported. The available exchanges are: " + JSON.stringify(helper.supportedExchanges);
     console.log('Message sent: ', message);
     res.send(message);
     return;

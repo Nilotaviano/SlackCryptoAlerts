@@ -1,44 +1,46 @@
 var request = require('request');
 var db = require('./../database/db');
+var bittrex = require('node.bittrex.api');
+
 
 function setAlert(username, currency, currencyAcronym, currentPrice, alertPrice, message, source, exchange, baseCurrency, callback) {
-    // Test if the coin exists on coinmarketcap
-    request('https://api.coinmarketcap.com/v1/ticker/' + currency, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var responseJson = JSON.parse(response.body)[0];
-            var triggerCondition = alertPrice > currentPrice ? '>' : '<';
-            
-            if (currentPrice == null)
-                currentPrice = responseJson.price_btc;
+    // Test if the coin exists
 
-            if (currencyAcronym == null)
-                currencyAcronym = responseJson.symbol;
-                
-            if(baseCurrency == null)
-                baseCurrency = 'BTC';
+    if (exchange == 'bittrex') {
+        bittrex.getticker({
+            market: baseCurrency + "-" + currency
+        }, function(ticker) {
+            if (ticker.success) {
+                var currentPrice = ticker.result.Last.toFixed(8);
 
-            var alerts = db.getCollection('alerts');
+                var triggerCondition = alertPrice > currentPrice ? '>' : '<';
 
-            alerts.insert({
-                currency: currency,
-                acronym: currencyAcronym,
-                user: username,
-                price: alertPrice,
-                condition: triggerCondition,
-                message: message,
-                source: source,
-                exchange: exchange,
-                baseCurrency: baseCurrency
-            });
+                var alerts = db.getCollection('alerts');
 
-            if (callback != null)
-                callback(null, triggerCondition);
-        }
-        else {
-            if (callback != null)
-                callback(responseJson.error, null);
-        }
-    });
+                alerts.insert({
+                    currency: currency,
+                    acronym: currencyAcronym,
+                    user: username,
+                    price: alertPrice,
+                    condition: triggerCondition,
+                    message: message,
+                    source: source,
+                    exchange: exchange,
+                    baseCurrency: baseCurrency
+                });
+
+                if (callback != null)
+                    callback(null, triggerCondition);
+            }
+            else {
+                if (callback != null)
+                    callback(ticker.message, null);
+            }
+        })
+    }
+    else {
+        callback('Only working for bittrex at the moment :(', null);
+    }
 }
 
 module.exports = {

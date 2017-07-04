@@ -3,22 +3,20 @@ var router = express.Router();
 var request = require('request');
 var db = require('./../database/db');
 var helper = require('./../helpers/alerts');
+var exchangesHelper = require('./../helpers/exchanges');
 
 router.post("/new", function(req, res) {
   var username = req.body.user_name;
-  var splitText = req.body.text.split(" ");
+  var commandParams = parseCommandParams(req.body.text);
 
-  if (splitText.length >= 2) {
-    var currency = splitText[0].toLowerCase();
-    var alertPrice = splitText[1];
-    var message = splitText.slice(2, splitText.length).join(" ");
-    
+  if (commandParams.valid) {
+
     // TODO: Allow both currency name or acronym
-    helper.setAlert(username, currency, null, null, alertPrice, message, 'user', null, 'BTC', function(error, triggerCondition) {
+    helper.setAlert(username, null, commandParams.currencyAcronym, null, commandParams.alertPrice, commandParams.message, 'user', commandParams.exchange, commandParams.baseCurrency, function(error, triggerCondition) {
       if (!error) {
         var messageJson = {
           //response_type: 'in_channel',
-          text: 'I will warn you when ' + currency + ' ' + triggerCondition + ' ' + alertPrice
+          text: 'I will warn you when ' + commandParams.currencyAcronym + ' ' + triggerCondition + ' ' + commandParams.alertPrice + ' ' + commandParams.baseCurrency + ' on ' + commandParams.exchange
         };
 
         console.log('Message sent: ', messageJson);
@@ -32,8 +30,13 @@ router.post("/new", function(req, res) {
     });
   }
   else {
+    var message = 'Unexpected format. Example command: /alert 1ST at 0.5 ETH on bittrex "damn"';
+    
+    if (commandParams.errorMessage != null)
+      message = commandParams.errorMessage;
+
     var messageJson = {
-      text: 'Unexpected format. Command format is "/alert coin price".'
+      text: message
     };
 
     console.log('Message sent: ', messageJson);
@@ -41,6 +44,48 @@ router.post("/new", function(req, res) {
     res.send(messageJson);
   }
 });
+
+function parseCommandParams(commandText) {
+  var result = new Object();
+  result.valid = true;
+
+  var splitText = commandText.split(' ');
+
+  result.currencyAcronym = splitText[0].toUpperCase();
+  result.alertPrice = splitText[2];
+  result.baseCurrency = splitText[3];
+  result.exchange = splitText[4];
+
+  if (result.currencyAcronym == null || result.alertPrice == null || isNaN(result.alertPrice) || result.baseCurrency == null) {
+    result.valid = false;
+
+    return result;
+  }
+  
+  if (exchangesHelper.supportedExchanges.indexOf(result.exchange) == -1) {
+    result.errorMessage = "Exchange not supported. The available exchanges are: " + JSON.stringify(exchangesHelper.supportedExchanges);
+    result.valid = false;
+
+    return result;
+  }
+
+  var messageStartIndex = commandText.indexOf('"');
+
+  if (messageStartIndex > 0) {
+    var messageEndIndex = commandText.indexOf('"', messageStartIndex + 1);
+
+    if (messageEndIndex > 0) {
+      result.message = commandText.substr(messageStartIndex + 1, messageEndIndex - messageStartIndex - 1);
+    }
+    else {
+      result.valid = false;
+
+      return result;
+    }
+  }
+
+  return result;
+}
 
 router.post("/", function(req, res) {
   var responseMessage = 'Alerts:\n'

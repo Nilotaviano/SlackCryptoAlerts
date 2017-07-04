@@ -2,6 +2,8 @@ var request = require('request');
 var jsSHA = require("jssha");
 var db = require('./../database/db');
 
+var supportedExchanges = ["bittrex", "poloniex"];
+
 function getOpenOrdersBittrex(res, username, userid) {
   var apiRegistry = getAPIKey('bittrex', userid);
 
@@ -116,5 +118,6 @@ module.exports = {
   getOpenOrdersBittrex: getOpenOrdersBittrex,
   getOrderHistoryBittrex: getOrderHistoryBittrex,
   bittrexAPICall: bittrexAPICall,
-  getAPIKey: getAPIKey
+  getAPIKey: getAPIKey,
+  supportedExchanges: supportedExchanges
 };
