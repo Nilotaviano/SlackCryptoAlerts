@@ -8,7 +8,7 @@ function setAlert(username, currency, currencyAcronym, currentPrice, alertPrice,
 
     if (exchange == 'bittrex') {
         bittrex.getticker({
-            market: baseCurrency + "-" + currency
+            market: baseCurrency + "-" + currencyAcronym
         }, function(ticker) {
             if (ticker.success) {
                 var currentPrice = ticker.result.Last.toFixed(8);
