@@ -32,8 +32,11 @@ var db = new loki(process.env.DB_NAME, {
 
     var acronyms = db.getCollection('acronyms');
     if (acronyms == null) {
-      acronyms = db.addCollection('acronyms');
+      acronyms = db.addCollection('acronyms', { indices: ['acronym'] });
     }
+    acronyms.chain().where(function(acronym) {
+      return acronym.exchange == null
+    }).remove();
 
   },
   autosave: true,

@@ -7,9 +7,11 @@ var poloniex = require('poloniex-api-node');
 var alertsHelper = require('./../helpers/alerts');
 var bot = require('./../bot/bot');
 
-var notificationsWebhookURL = process.env.NOTIFICATIONS_WEBHOOK_URL || '';
-
-var exchangeWebhook = new IncomingWebhook(notificationsWebhookURL);
+if(process.env.NOTIFICATIONS_WEBHOOK_URL)
+{
+  var notificationsWebhookURL = process.env.NOTIFICATIONS_WEBHOOK_URL || '';
+  var exchangeWebhook = new IncomingWebhook(notificationsWebhookURL);
+}
 
 function checkClosedOrders() {
   checkClosedOrdersBittrex();
@@ -69,14 +71,15 @@ function checkClosedOrdersBittrex() {
       try {
         bot.sendMessageToUser(registry.username, responseMessage);
         
-        exchangeWebhook.send(messageJson, function(err, res) {
-          if (err) {
-            console.log('Error:', err);
-          }
-          else {
-            console.log('Message sent: ', res);
-          }
-        });
+        if(exchangeWebhook)
+          exchangeWebhook.send(messageJson, function(err, res) {
+            if (err) {
+              console.log('Error:', err);
+            }
+            else {
+              console.log('Message sent: ', res);
+            }
+          });
         
         exchanges.updateWhere(
           function(r) {
@@ -153,14 +156,15 @@ function checkClosedOrdersPoloniex() {
           
           bot.sendMessageToUser(registry.username, responseMessage);
 
-          exchangeWebhook.send(messageJson, function(err, res) {
-            if (err) {
-              console.log('Error dispatching alert:', err);
-            }
-            else {
-              console.log('Message sent: ', res);
-            }
-          });
+          if(exchangeWebhook)
+            exchangeWebhook.send(messageJson, function(err, res) {
+              if (err) {
+                console.log('Error dispatching alert:', err);
+              }
+              else {
+                console.log('Message sent: ', res);
+              }
+            });
         }
       }
     });

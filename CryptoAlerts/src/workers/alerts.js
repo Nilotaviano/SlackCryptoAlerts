@@ -6,9 +6,11 @@ var async = require('async');
 var bittrex = require('node.bittrex.api');
 var poloniex = require('poloniex-api-node');
 
-var notificationsWebhookURL = process.env.NOTIFICATIONS_WEBHOOK_URL || '';
-
-var alertsWebhook = new IncomingWebhook(notificationsWebhookURL);
+if(process.env.NOTIFICATIONS_WEBHOOK_URL)
+{
+  var notificationsWebhookURL = process.env.NOTIFICATIONS_WEBHOOK_URL || '';
+  var alertsWebhook = new IncomingWebhook(notificationsWebhookURL);
+}
 
 var compareFunctions = {
   '>': function(currentPrice, alertPrice) {
@@ -119,14 +121,15 @@ function checkTriggeredAlerts() {
             try {
               bot.sendMessageToUser(allAlerts[i].user, messageToSend);
 
-              alertsWebhook.send(messageToSend, function(err, res) {
-                if (err) {
-                  console.log('Error:', err);
-                }
-                else {
-                  console.log('Message sent: ', res);
-                }
-              });
+              if(alertsWebhook)
+                alertsWebhook.send(messageToSend, function(err, res) {
+                  if (err) {
+                    console.log('Error:', err);
+                  }
+                  else {
+                    console.log('Message sent: ', res);
+                  }
+                });
 
               alerts.remove(allAlerts[i]);
             }

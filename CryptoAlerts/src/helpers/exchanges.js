@@ -68,8 +68,12 @@ function getOrderHistoryBittrex(res, userid, ordersFunction) {
 
   bittrexAPICall(apiRegistry.apikey, apiRegistry.apiSecret, 'account/getorderhistory', '', function(error, response, body) {
     var responseJson = JSON.parse(response.body);
-    if (ordersFunction != null)
-      ordersFunction(responseJson.result);
+    if(responseJson.success) {
+      if (ordersFunction != null)
+        ordersFunction(responseJson.result);
+    } 
+    else if(responseJson.message && res)
+      res.send(responseJson.message);
   });
 }
 
