@@ -231,7 +231,7 @@ function respondOrderHistoryBittrex(res, userid) {
         console.log('It was not possible to find name for acronym: ', acronym);
         
       var orderType = openOrder.OrderType == 'LIMIT_SELL' ? 'Venda' : 'Compra';
-      var quantity = openOrder.Quantity;
+      var quantity = openOrder.Quantity - openOrder.QuantityRemaining;
       var price = openOrder.PricePerUnit;
 
       var orderDescription = currency + '	' + orderType + '	' + quantity + '	' + price;
