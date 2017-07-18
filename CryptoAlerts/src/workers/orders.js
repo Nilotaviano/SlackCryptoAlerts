@@ -34,13 +34,15 @@ function checkClosedOrdersBittrex() {
         return;
       var ordersDescriptions = [];
 
+      var mostRecentOrderUID = orders[0].OrderUuid;
+
       for (var i = 0; i < orders.length; i++) {
         var order = orders[i];
 
         var orderDate = Date.parse(order.Closed);
 
-        if (!registry.hasOwnProperty("lastCheck") || orderDate < registry.lastCheck)
-          continue;
+        if (!registry.hasOwnProperty("lastCheck") || !registry.hasOwnProperty("mostRecentOrderUID") || order.OrderUuid == registry.mostRecentOrderUID || orderDate < registry.lastCheck)
+          break;
 
         var baseCurrency = order.Exchange.split('-')[0];
         var currency = order.Exchange.split('-')[1];
@@ -87,6 +89,7 @@ function checkClosedOrdersBittrex() {
           },
           function(r) {
             r.lastCheck = Date.now();
+            r.mostRecentOrderUID = mostRecentOrderUID;
             return r;
           }
         );
