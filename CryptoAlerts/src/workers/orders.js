@@ -30,7 +30,7 @@ function checkClosedOrdersBittrex() {
 
   var processEachRegistryFunction = function(registry) {
     return function(orders) {
-      if (orders == null)
+      if (orders == null || orders.length == 0)
         return;
       var ordersDescriptions = [];
 
