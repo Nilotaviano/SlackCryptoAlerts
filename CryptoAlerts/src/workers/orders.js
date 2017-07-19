@@ -41,7 +41,7 @@ function checkClosedOrdersBittrex() {
 
         var orderDate = Date.parse(order.Closed);
 
-        if (!registry.hasOwnProperty("lastCheck") || !registry.hasOwnProperty("mostRecentOrderUID") || order.OrderUuid == registry.mostRecentOrderUID || orderDate < registry.lastCheck)
+        if (!registry.hasOwnProperty("lastCheck") || order.OrderUuid == registry.mostRecentOrderUID || orderDate < registry.lastCheck)
           break;
 
         var baseCurrency = order.Exchange.split('-')[0];
