@@ -220,21 +220,12 @@ function respondOrderHistoryBittrex(res, userid) {
     
     for (var i = 0; i < orders.length; i++) {
       var openOrder = orders[i];
-      var acronym = openOrder.Exchange.split('-')[1];
-      
-      var acronymEntry = acronyms.find({'acronym': acronym.toUpperCase()});
-      var currency = acronym;
-      
-      if(acronymEntry && acronymEntry[0])
-        currency = acronymEntry[0].name;
-      else
-        console.log('It was not possible to find name for acronym: ', acronym);
         
       var orderType = openOrder.OrderType == 'LIMIT_SELL' ? 'Venda' : 'Compra';
       var quantity = openOrder.Quantity - openOrder.QuantityRemaining;
       var price = openOrder.PricePerUnit;
 
-      var orderDescription = currency + '	' + orderType + '	' + quantity + '	' + price;
+      var orderDescription = 'bittrex' + '  ' + openOrder.Exchange + '	' + orderType + '	' + quantity + '	' + price;
 
       ordersDescriptions.unshift(orderDescription);
     }
