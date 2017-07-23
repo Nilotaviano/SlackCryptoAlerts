@@ -225,7 +225,7 @@ function respondOrderHistoryBittrex(res, userid) {
       var quantity = openOrder.Quantity - openOrder.QuantityRemaining;
       var price = openOrder.PricePerUnit;
 
-      var orderDescription = 'bittrex' + '  ' + openOrder.Exchange + '	' + orderType + '	' + quantity + '	' + price;
+      var orderDescription = 'bittrex' + '	' + openOrder.Exchange + '	' + orderType + '	' + quantity + '	' + price;
 
       ordersDescriptions.unshift(orderDescription);
     }
