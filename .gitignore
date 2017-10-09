@@ -60,3 +60,4 @@ typings/
 *.db
 .vs/SlackCryptoAlerts/v15/.suo
 package-lock.json
+SlackCryptoAlerts.njsproj.user

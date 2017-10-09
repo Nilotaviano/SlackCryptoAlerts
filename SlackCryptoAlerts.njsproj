@@ -11,7 +11,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f61a2960-752a-4e2a-9829-880b32997498</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>src\app.js</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -28,9 +28,29 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="app.js" />
+    <Compile Include="src\app.js" />
+    <Compile Include="src\bot\bot.js" />
+    <Compile Include="src\controllers\alerts.js" />
+    <Compile Include="src\controllers\calls.js" />
+    <Compile Include="src\controllers\exchanges.js" />
+    <Compile Include="src\controllers\index.js" />
+    <Compile Include="src\database\db.js" />
+    <Compile Include="src\helpers\alerts.js" />
+    <Compile Include="src\helpers\exchanges.js" />
+    <Compile Include="src\workers\acronymsMappingUpdater.js" />
+    <Compile Include="src\workers\alerts.js" />
+    <Compile Include="src\workers\index.js" />
+    <Compile Include="src\workers\orders.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\" />
+    <Folder Include="src\bot\" />
+    <Folder Include="src\controllers\" />
+    <Folder Include="src\database\" />
+    <Folder Include="src\helpers\" />
+    <Folder Include="src\workers\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
