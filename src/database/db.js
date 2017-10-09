@@ -1,6 +1,5 @@
 var loki = require('lokijs');
 
-
 var db = new loki(process.env.DB_NAME, {
   autoload: true,
   autoloadCallback: function() {
@@ -40,7 +39,7 @@ var db = new loki(process.env.DB_NAME, {
 
   },
   autosave: true,
-  autosaveInterval: 10000
+  autosaveInterval: 1000
 });
 
 

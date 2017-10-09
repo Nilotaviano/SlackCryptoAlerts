@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var workers = require('./workers');
 var db = require('./database/db');
+var ON_DEATH = require('death'); //this is intentionally ugly
 
 var app = express();
 
@@ -13,11 +14,10 @@ app.use(bodyParser.json());
 
 app.use(require('./controllers'));
 
-process.on('uncaughtException', function(err) {
-    // handle the error safely
+ON_DEATH(function (signal, err) {
     console.log(err);
-    db.saveDatabase();
-});
+    db.close();
+})
 
 app.listen(parseInt(process.env.PORT), function (err) {
   if (err) {
