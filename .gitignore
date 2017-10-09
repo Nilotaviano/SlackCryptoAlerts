@@ -58,3 +58,5 @@ typings/
 .env
 
 *.db
+.vs/SlackCryptoAlerts/v15/.suo
+package-lock.json
