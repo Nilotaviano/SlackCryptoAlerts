@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var workers = require('./workers');
 var db = require('./database/db');
-var ON_DEATH = require('death'); //this is intentionally ugly
+var ON_DEATH = require('death')({ uncaughtException: true }) 
 
 var app = express();
 
